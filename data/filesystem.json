@@ -65,9 +65,8 @@
     "lib": {},
     "home": {
       "user": {
-        "discord.deb": {},
-        "steam.deb": {},
-        "example.txt": "If I forget my password, It's Stekil2008!"
+        "randomInfo.txt": "Elgato was the first man know to human to actually test this OS :P",
+        "password.txt": "root password is `root` btw!"
       }
     },
     "lib-usr": {},

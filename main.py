@@ -5,6 +5,8 @@ import os
 import time
 from datetime import datetime
 import random
+import shutil
+import platform
 
 # Add these global variables at the top of the file
 # Initialize with only root user
@@ -718,6 +720,8 @@ def help_cmd(args):
     print("  logout     - Logout current user")
     print("  reboot     - Restart the system")
     print("  users      - Show all users (sudo required)")
+    print("  security   - Show security features (sudo required)")
+    print("  neofetch   - Show system information")
 
     if len(args) > 0 and args[0] == "security":
         print("\nSecurity Features:")
@@ -1244,6 +1248,26 @@ def security(args):
     else:
         print("\nNote: Run 'sudo security' for detailed security status")
 
+def neofetch(args=None):
+    now = datetime.now()
+
+    total, used, free = shutil.disk_usage("/")
+
+    """Show system information."""
+    print("\n=== PyShellOS System Information ===")
+    print("\nSystem Information:")
+    print(f" /$$$$$$$              - OS: PyShellOS-01-01-Beta")
+    print(f" | $$__  $$            - OS: {platform.system()} {platform.release()}")
+    print(f" | $$  \ $$ /$$   /$$  - Architecture: {platform.machine()}")
+    print(f" | $$$$$$$/| $$  | $$  - Python: {platform.python_version()}")
+    print(f" | $$____/ | $$  | $$  - Shell: PyShellOS-Terminal")
+    print(f" | $$      | $$  | $$  - Disk: {round(used / (1024 ** 3), 2)} GB used / {round(total / (1024 ** 3), 2)} GB total")
+    print(f" | $$      |  $$$$$$$  - Python: Py3")
+    print(f" |__/       \____  $$  - Shell: PyShellOS-Terminal")
+    print(f"             /$$  | $$")
+    print(f"            |  $$$$$$/")
+    print(f"             \______/")
+
 # Then at the bottom of the file, after all function definitions but before shell()
 def init_commands():
     global commands
@@ -1277,7 +1301,8 @@ def init_commands():
         "logout": logout,
         "reboot": reboot,
         "users": users,
-        "security": security
+        "security": security,
+        "neofetch": neofetch
     })
 
 # Update the main block to use login()
