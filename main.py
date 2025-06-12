@@ -1,12 +1,29 @@
 # licensed @2025 Stefan Kilber - PyCharm Professional - PyShellOS-1.1-Beta
 
 import json
-import os
 import time
 from datetime import datetime
 import random
 import shutil
 import platform
+import urllib.request
+import os
+import sys
+
+
+def update_main_py_and_restart():
+    url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/main.py"
+    local_path = os.path.abspath(sys.argv[0])
+
+    print("[ ✓ ] fetching update...")
+    time.sleep(random.randint(1, 15))
+    urllib.request.urlretrieve(url, local_path)
+
+    print("[ ✓ ] Update successfull. rebooting...")
+    time.sleep(3)
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+
 
 # Add these global variables at the top of the file
 # Initialize with only root user
@@ -823,8 +840,9 @@ def settings(args):
         print("├ 1. User Settings")
         print("├ 2. General")
         print("├ 3. System")
+        print("├ 4. Update PyShellOS")
         print("│")
-        print("├ 4. Return to shell")
+        print("├ 5. Return to shell")
         print("│")
         print("└─────────────────────────────────────────────────")
 
@@ -837,6 +855,8 @@ def settings(args):
         elif choice == "3":
             system_info()
         elif choice == "4":
+            update_main_py_and_restart()
+        elif choice == "5":
             print("Exiting settings...")
             break
         else:
@@ -944,6 +964,27 @@ def user_settings():
         else:
             print("Invalid option")
 
+def update_settings():
+    while True:
+        print("┌Update Settings────────────────────────────────")
+        print("│")
+        print("├    Current Version: PyShellOS-01.02-Beta")
+        print("├ 1. Update version")
+        print("│")
+        print("├ 2. Back")
+        print("│")
+        print("└───────────────────────────────────────────────")
+
+        choice = input("\nSelect option (1-3): ").strip()
+
+        if choice == "1":
+            update_main_py_and_restart()
+
+        elif choice == "2":
+            break
+        else:
+            print("Invalid option")
+
 
 def system_settings():
     """Handle system-related settings."""
@@ -955,7 +996,7 @@ def system_settings():
         print("├ 3. Bulk Remove All Users")
         print("├ 4. Show security Info")
         print("│")
-        print("├ 5. Back")
+        print("├ 6. Back")
         print("│")
         print("└───────────────────────────────────────────────")
 
@@ -1084,6 +1125,10 @@ def first_boot_setup():
     print("│The system will now start")
     print("│")
 
+    # Persist to disk
+    with open("data/filesystem.json", "w") as f:
+        json.dump(fs, f, indent=4)
+
     # Set current user
     global CURRENT_USER
     CURRENT_USER = username
@@ -1202,71 +1247,117 @@ if __name__ == "__main__":
     time.sleep(0.2)
     print("Tip of the boot: If you see a `Access denied` error, try running `sudo [command]`")
     time.sleep(0.1)
-    print("\n[ ✔️ ] Initializing system...")
+    print("\n[ ✓ ] Initializing system...")
+    time.sleep(random.randint(1, 2))
+    print("[ ✓ ] Mounting /Kernel")
+    time.sleep(random.randint(1, 4))
+    print("[ ✓ ] Mounting /Boot")
+    time.sleep(random.randint(1, 2))
+    print("[ ✓ ] Mounting /Home")
+    time.sleep(random.randint(1, 3))
+    print("[ ✓ ] Extracting Kernel Level Files...")
+    time.sleep(random.randint(1, 3))
+    print("[ ✓ ] Initializing Storage...")
+    time.sleep(random.randint(1, 5))
+    print("[ ✓ ] Mounting /dev...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /proc...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /sys...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /run...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /home...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /tmp...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /etc...")
+    time.sleep(0.4)
+    print("[ ✓ ] Mounting /var...")
+    time.sleep(0.1)
+    print("[ ✓ ] Mounting /opt...")
+    time.sleep(0.1)
+    print("[ ✓ ] Logging in as root...")
+    time.sleep(random.randint(1, 4))
+    print("[ ✓ ] root executing /etc/..init/boot.py...")
+    time.sleep(random.randint(1, 1))
+    print("[ ✓ ] root executing /Kernel/main/kernel.py...")
+    time.sleep(0.1)
+    print("[ ✓ ] root disowning /Kernel...")
+    time.sleep(random.randint(1, 4))
+    print("[ ✓ ] root disowning /Boot...")
+    time.sleep(random.randint(1, 5))
+    print("[ ✓ ] Identifying Data")
+    time.sleep(random.randint(1, 6))
+    print("[ ✓ ] Loading Archives")
+    time.sleep(random.randint(1, 3))
+    print("[ ✓ ] Validating kernel Signature")
+    time.sleep(random.randint(1, 3))
+    print("\n" * 50)
 
     is_first_boot = check_first_boot()
     if is_first_boot:
-        print("\n[ ✔️ ] Detected first boot... This could take a moment...")
+        print("\n[ ✓ ] Detected first boot... This could take a moment...")
         time.sleep(0.3)
-        print("\n[ ✔️ ] Please wait")
+        print("\n[ ✓ ] Please wait")
         time.sleep(0.5)
-        print("\n[ ✔️ ] Initializing system...")
+        print("[ ✓ ] Initializing system...")
         time.sleep(1)
-        print("[ ✔️ ] Mounting /Kernel")
+        print("[ ✓ ] Mounting /Kernel")
         time.sleep(0.1)
-        print("[ ✔️ ] Mounting /Boot")
+        print("[ ✓ ] Mounting /Boot")
         time.sleep(0.2)
-        print("[ ✔️ ] Mounting /Home")
+        print("[ ✓ ] Mounting /Home")
         time.sleep(0.1)
-        print("[ ✔️ ] Extracting Kernel Level Files...")
+        print("[ ✓ ] Extracting Kernel Level Files...")
         time.sleep(0.2)
-        print("[ ✔️ ] Compiling Operating System...")
+        print("[ ✓ ] Compiling Operating System...")
         time.sleep(0.01)
-        print("[ ✔️ ] Initializing Storage...")
+        print("[ ✓ ] Initializing Storage...")
         time.sleep(0)
         print("[ ❌ ] Mounting /dev...")
         time.sleep(0.2)
-        print("[ ✔️ ] Mounting /proc...")
+        print("[ ✓ ] Mounting /proc...")
         time.sleep(0.1)
-        print("[ ✔️ ] Mounting /sys...")
+        print("[ ✓ ] Mounting /sys...")
         time.sleep(0.1)
-        print("[ ✔️ ] Mounting /run...")
+        print("[ ✓ ] Mounting /run...")
         time.sleep(0.1)
-        print("[ ✔️ ] Mounting /home...")
+        print("[ ✓ ] Mounting /home...")
         time.sleep(0.2)
-        print("[ ✔️ ] Mounting /tmp...")
+        print("[ ✓ ] Mounting /tmp...")
         time.sleep(0.1)
         print("[ ❌ ] Mounting /etc...")
         time.sleep(4.2)
-        print("[ ✔️ ] Mounting /var...")
+        print("[ ✓ ] Mounting /var...")
         time.sleep(0.2)
-        print("[ ✔️ ] Mounting /opt...")
+        print("[ ✓ ] Mounting /opt...")
         time.sleep(0.3)
-        print("[ ✔️ ] Retrying - Mounting /dev...")
+        print("[ ✓ ] Retrying - Mounting /dev...")
         time.sleep(0.1)
-        print("[ ✔️ ] Retrying - Mounting /etc...")
+        print("[ ✓ ] Retrying - Mounting /etc...")
         time.sleep(0.5)
-        print("[ ✔️ ] Logging in as root...")
+        print("[ ✓ ] Logging in as root...")
         time.sleep(0.2)
-        print("[ ✔️ ] root executing /etc/..init/boot.py...")
+        print("[ ✓ ] root executing /etc/..init/boot.py...")
         time.sleep(0.1)
-        print("[ ✔️ ] root executing /Kernel/main/kernel.py...")
+        print("[ ✓ ] root executing /Kernel/main/kernel.py...")
         time.sleep(0.1)
-        print("[ ✔️ ] root disowning /Kernel...")
+        print("[ v ] root disowning /Kernel...")
         time.sleep(0.3)
-        print("[ ✔️ ] root disowning /Boot...")
+        print("[ ✓ ] root disowning /Boot...")
         time.sleep(0.2)
-        print("[ ✔️ ] Launching user setup...")
+        print("[ ✓ ] Launching user setup...")
         time.sleep(0.1)
-        print("[ ✔️ ] Creating temp dir in /home as /home/tempusr/...")
+        print("[ ✓ ] Creating temp dir in /home as /home/tempusr/...")
         time.sleep(0.2)
-        print("[ ✔️ ] preparing User setup...")
+        print("[ ✓ ] preparing User setup...")
         time.sleep(0.3)
-        print("[ ✔️ ] Identifying Data")
+        print("[ ✓ ] Identifying Data")
         time.sleep(0.2)
-        print("[ ✔️ ] Loading Archives")
+        print("[ ✓ ] Loading Archives")
         time.sleep(0.1)
-        print("[ ✔️ ] Validating kernel Signature")
+        print("[ ✓ ] Validating kernel Signature")
         time.sleep(4.2)
         print("\n" * 50)
         first_boot_setup()
