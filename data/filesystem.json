@@ -60,21 +60,10 @@
         },
         ".etc": {
             ".userdata": {
-                ".Stefan": {
-                    ".username": "Stefan",
-                    ".password": "Stekil2008"
-                }
             }
         },
         "lib": {},
-        "home": {
-            "Stefan": {
-                "Documents": {},
-                "Downloads": {},
-                "Desktop": {},
-                "welcome.txt": "Welcome to PyShellOS, Stefan!\nThis is your home directory."
-            }
-        },
+        "home": {},
         "lib-usr": {},
         "lib64": {},
         "media": {},
