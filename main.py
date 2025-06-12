@@ -851,6 +851,8 @@ def system_info():
         print(f"│"+"\033[1;32m"+"        Python: {platform.python_version()}"+"\033[0m")
         print("│"+"\033[1;32m"+"         Shell: PyshellOS-Terminal"+"\033[0m")
         print("│"+"\033[1;32m"+"        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print("│"+"\033[1;32m"+"     Publisher: Stefan Kilber"+"\033[0m")
+        print("│"+"\033[1;32m"+"          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
         print("│")
         print("├ 1. User Settings")
         print("├ 2. General")
