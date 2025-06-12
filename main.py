@@ -957,7 +957,6 @@ def system_settings():
         print("│")
         print("└───────────────────────────────────────────────")
 
-
         choice = input("\nSelect option (1-4): ").strip()
 
         if choice == "1":
