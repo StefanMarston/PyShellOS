@@ -284,148 +284,6 @@ def mv(args):
     if len(args) < 2:
         print("mv: Missing source or destination")
         return
-def user_settings():
-    """Handle user-related settings."""
-    while True:
-        current_user = get_current_username()
-        print("\n=== User Settings ===")
-        print(f"\nCurrently logged in as {current_user}")
-        print("\n1. Change Username")
-        print("2. Change Password")
-        print("3. Add User")
-        print("4. Remove User")
-        print("5. Back")
-
-        choice = input("\nSelect option (1-5): ").strip()
-
-        if choice == "1":
-            new_username = input("Enter new username: ").strip()
-            if new_username:
-                if new_username in USERS:
-                    print("Username already exists!")
-                else:
-                    USERS[new_username] = USERS[current_user]
-                    del USERS[current_user]
-                    global CURRENT_USER
-                    CURRENT_USER = new_username
-                    print("Username updated successfully!")
-            else:
-                print("Username cannot be empty")
-
-        elif choice == "2":
-            new_password = input("Enter new password: ").strip()
-            confirm_password = input("Confirm new password: ").strip()
-            if not new_password:
-                print("Password cannot be empty")
-            elif new_password != confirm_password:
-                print("Passwords do not match")
-            else:
-                USERS[current_user]["password"] = new_password
-                print("Password updated successfully!")
-
-        elif choice == "3":
-            username = input("Enter new username: ").strip()
-            if username in USERS:
-                print("User already exists!")
-            else:
-                password = input("Enter password: ").strip()
-                confirm = input("Confirm password: ").strip()
-                if password != confirm:
-                    print("Passwords do not match!")
-                else:
-                    USERS[username] = {"password": password}
-                    print(f"User {username} created successfully!")
-
-        elif choice == "4":
-            username = input("Enter username to remove: ").strip()
-            if username == "root":
-                print("Cannot remove root user!")
-            elif username not in USERS:
-                print("User does not exist!")
-            else:
-                confirm = input(f"Are you sure you want to remove user {username}? (y/N): ").strip().lower()
-                if confirm == 'y':
-                    del USERS[username]
-                    print(f"User {username} removed successfully!")
-
-        elif choice == "5":
-            break
-        else:
-            print("Invalid option")
-
-
-def system_settings():
-    """Handle system-related settings."""
-    while True:
-        print("\n=== System Settings ===")
-        print("\n1. Reset PyShellOS")
-        print("2. Restart PyShellOS")
-        print("3. Bulk Remove All Users")
-        print("4. Back")
-
-        choice = input("\nSelect option (1-4): ").strip()
-
-        if choice == "1":
-            confirm = input("Are you sure you want to reset PyShellOS? This will erase all data! (type 'RESET' to confirm): ")
-            if confirm == "RESET":
-                print("Resetting PyShellOS...")
-                # Reset filesystem to initial state
-                global fs, USERS
-                fs = {"/": {
-                    "bin": {},
-                    "boot": {},
-                    "home": {},
-                    ".etc": {
-                        ".userdata": {
-                            ".root": {
-                                ".username": "root",
-                                ".password": "root"
-                            }
-                        }
-                    },
-                    ".root": {
-                        ".sudopswd": "root"
-                    }
-                }}
-
-                USERS = {"root": {"password": "root"}}
-                print("OS reset complete!")
-                print("System will now reboot...")
-                reboot([])  # Reboot the system after reset
-                return
-            else:
-                print("Reset cancelled")
-
-        elif choice == "2":
-            confirm = input("Are you sure you want to restart PyShellOS? (y/N): ").strip().lower()
-            if confirm == 'y':
-                print("Restarting PyShellOS...")
-                reboot([])
-                return
-
-        elif choice == "3":
-            confirm = input("Are you sure you want to remove all non-root users? (type 'REMOVE' to confirm): ")
-            if confirm == "REMOVE":
-                users_to_remove = [user for user in USERS if user != "root"]
-                for user in users_to_remove:
-                    del USERS[user]
-                print("All non-root users have been removed!")
-            else:
-                print("Operation cancelled")
-
-        elif choice == "4":
-            break
-        else:
-            print("Invalid option")
-    source, dest = args[0], args[1]
-    d = get_dir(cwd)
-
-    if source not in d:
-        print(f"mv: Cannot move '{source}': No such file")
-        return
-
-    d[dest] = d[source]
-    del d[source]
 
 
 def grep(args):
@@ -798,14 +656,11 @@ def nano(args):
         content = d.get(filename, "")
 
         # Show instructions
-        print("\n=== Nano Text Editor ===")
-        print("Instructions:")
-        print("- Enter text (multiple lines supported)")
-        print("- To save and exit: type ':wq' on a new line")
-        print("- To exit without saving: type ':q' on a new line")
-        print("- To clear all text: type ':clear' on a new line")
-        print("- To delete last line: type ':del' on a new line")
-        print("Current content:\n")
+        print("┌Nano text Editor─┬────────┬─────────────┬─────────────────┬────────────┬───────────────────┐")
+        print("│  Instructions:  │ Enter  │     :sv     │      :sn        │   :clear   │       :del        │")
+        print("│                 │ Output │ save & exit │ exit w/o saving │ clear file │ del previous line │")
+        print("│                 └────────┴─────────────┴─────────────────┴────────────┴───────────────────┘")
+        print(f"└Current content of {filename}:")
 
         if content:
             print(content)
@@ -818,13 +673,13 @@ def nano(args):
         while True:
             try:
                 line = input()
-                if line == ':wq':
+                if line == ':sy':
                     # Save and exit
                     new_content = '\n'.join(lines)
                     d[filename] = new_content
                     print(f"File '{filename}' saved")
                     break
-                elif line == ':q':
+                elif line == ':sn':
                     # Exit without saving
                     confirm = input("Exit without saving? (y/N): ")
                     if confirm.lower() == 'y':
@@ -846,7 +701,7 @@ def nano(args):
                 lines.append(line)
             except KeyboardInterrupt:
                 # Handle Ctrl+C
-                print("\nUse ':q' to exit or ':wq' to save and exit")
+                print("\nUse ':sn' to exit or ':sy' to save and exit")
                 continue
             except EOFError:
                 # Handle Ctrl+D
@@ -961,11 +816,16 @@ def settings(args):
 
     while True:
         current_user = get_current_username()
-        print("\n=== Settings Shell Application ===")
-        print(f"\nCurrently logged in as {current_user} {'system' if current_user == 'root' else 'user'}")
-        print("\n1. User Settings")
-        print("2. System Settings")
-        print("3. Exit Settings")
+        print("┌Settings Shell Application─────────────────────")
+        print("│")
+        print(f"│ Currently logged in as user:{current_user} with permission:{'system' if current_user == 'root' else 'user'}")
+        print("│")
+        print("├ 1. User Settings")
+        print("├ 2. System Settings")
+        print("│")
+        print("├ 3. Exit Settings")
+        print("│")
+        print("└─────────────────────────────────────────────────")
 
         choice = input("\nSelect option (1-3): ").strip()
 
@@ -981,30 +841,31 @@ def settings(args):
 
 def first_boot_setup():
     """Initial setup when running the system for the first time."""
-    print("\n=== Welcome to PyShellOS First-Time Setup ===")
-    print("Let's create your user account.\n")
+    print("┌Welcome to PyShellOS First-Time Setup──────────")
+    print("│Let's create your user account.")
+    print("│")
 
     while True:
-        username = input("Enter username: ").strip()
+        username = input("│Enter username: ").strip()
         if not username:
-            print("Username cannot be empty")
+            print("│Username cannot be empty")
             continue
         if username.lower() == 'root':
-            print("Cannot use 'root' as username")
+            print("│Cannot use 'root' as username")
             continue
         if not username.isalnum():
-            print("Username must contain only letters and numbers")
+            print("│Username must contain only letters and numbers")
             continue
         break
 
     while True:
-        password = input("Enter password: ").strip()
+        password = input("│Enter password: ").strip()
         if not password:
-            print("Password cannot be empty")
+            print("│Password cannot be empty")
             continue
-        confirm_password = input("Confirm password: ").strip()
+        confirm_password = input("│Confirm password: ").strip()
         if password != confirm_password:
-            print("Passwords do not match")
+            print("│Passwords do not match")
             continue
         break
 
@@ -1035,11 +896,11 @@ def first_boot_setup():
         }
     }
 
-    print("\nUser account created successfully!")
-    print(f"Username: {username}")
-    print(f"Home directory created at: /home/{username}")
-    print("\nSystem initialization complete.")
-    print("The system will now start...\n")
+    print("│User account created successfully!")
+    print(f"│Username: {username}")
+    print("│System initialization complete.")
+    print("│The system will now start")
+    print("│")
 
     # Set current user
     global CURRENT_USER
@@ -1075,13 +936,18 @@ def user_settings():
     """Handle user-related settings."""
     while True:
         current_user = get_current_username()
-        print("\n=== User Settings ===")
-        print(f"\nCurrently logged in as {current_user}")
-        print("\n1. Change Username")
-        print("2. Change Password")
-        print("3. Add User")
-        print("4. Remove User")
-        print("5. Back")
+        print("┌User Settings──────────────────────────────────")
+        print("|")
+        print(f"│ Currently logged in as user: {current_user}")
+        print("│")
+        print("├ 1. Change Username")
+        print("├ 2. Change Password")
+        print("├ 3. Add User")
+        print("├ 4. Remove User")
+        print("│")
+        print("├ 5. Back")
+        print("│")
+        print("└───────────────────────────────────────────────")
 
         choice = input("\nSelect option (1-5): ").strip()
 
@@ -1144,11 +1010,16 @@ def user_settings():
 def system_settings():
     """Handle system-related settings."""
     while True:
-        print("\n=== System Settings ===")
-        print("\n1. Reset PyShellOS")
-        print("2. Restart PyShellOS")
-        print("3. Bulk Remove All Users")
-        print("4. Back")
+        print("┌System Settings────────────────────────────────")
+        print("│")
+        print("├ 1. Reset PyShellOS")
+        print("├ 2. Restart PyShellOS")
+        print("├ 3. Bulk Remove All Users")
+        print("├ 4. Show security Info")
+        print("│")
+        print("├ 5. Back")
+        print("│")
+        print("└───────────────────────────────────────────────")
 
         choice = input("\nSelect option (1-4): ").strip()
 
@@ -1199,8 +1070,15 @@ def system_settings():
                 print("All non-root users have been removed!")
             else:
                 print("Operation cancelled")
-
         elif choice == "4":
+                print("Security Status:")
+                print("")
+                print(f"  - Current sudo timeout: 60 seconds after 3 failed attempts")
+                print(f"  - Current login timeout: 60 seconds after 3 failed attempts")
+                print(f"  - Sudo attempts since last reset: {SUDO_ATTEMPT_COUNTER}/3")
+                print("")
+
+        elif choice == "5":
             break
         else:
             print("Invalid option")
@@ -1224,29 +1102,6 @@ def users(args):
     for username in USERS:
         if username != "root":
             print(f"{username:<20} {'user'}")
-
-def security(args):
-    """Display security information and status."""
-    print("\n=== PyShellOS Security Information ===")
-    print("\nSecurity Features:")
-    print("  - Brute Force Protection: 3 attempts limit before temporary lockout")
-    print("  - Permission System: Root and user-level permissions")
-    print("  - File Protection: Hidden files are only accessible to owners")
-
-    if is_sudo_active():
-        # Show more detailed security information for administrators
-        print("\nSecurity Status:")
-        print(f"  - Current sudo timeout: 60 seconds after 3 failed attempts")
-        print(f"  - Current login timeout: 60 seconds after 3 failed attempts")
-        print(f"  - Sudo attempts since last reset: {SUDO_ATTEMPT_COUNTER}/3")
-
-        if SUDO_LOCKED_UNTIL > time.time():
-            remaining = int(SUDO_LOCKED_UNTIL - time.time())
-            print(f"  - Sudo currently locked for: {remaining} more seconds")
-        else:
-            print("  - Sudo access: Available")
-    else:
-        print("\nNote: Run 'sudo security' for detailed security status")
 
 def neofetch(args=None):
     now = datetime.now()
@@ -1301,7 +1156,6 @@ def init_commands():
         "logout": logout,
         "reboot": reboot,
         "users": users,
-        "security": security,
         "neofetch": neofetch
     })
 
@@ -1314,75 +1168,75 @@ if __name__ == "__main__":
     print("If you see a Syntax Error above the boot, ignore it!")
     time.sleep(1)
     print("\nPlease wait")
-    time.sleep(2)
+    time.sleep(0.2)
     print("Tip of the boot: If you see a `Access denied` error, try running `sudo [command]`")
-    time.sleep(3)
+    time.sleep(0.1)
     print("\n[ ✔️ ] Initializing system...")
 
     is_first_boot = check_first_boot()
     if is_first_boot:
         print("\n[ ✔️ ] Detected first boot... This could take a moment...")
-        time.sleep(5)
+        time.sleep(0.3)
         print("\n[ ✔️ ] Please wait")
-        time.sleep(5)
+        time.sleep(0.5)
         print("\n[ ✔️ ] Initializing system...")
         time.sleep(1)
         print("[ ✔️ ] Mounting /Kernel")
-        time.sleep(0.2)
+        time.sleep(0.1)
         print("[ ✔️ ] Mounting /Boot")
-        time.sleep(0.9)
+        time.sleep(0.2)
         print("[ ✔️ ] Mounting /Home")
         time.sleep(0.1)
         print("[ ✔️ ] Extracting Kernel Level Files...")
         time.sleep(0.2)
         print("[ ✔️ ] Compiling Operating System...")
-        time.sleep(2.6)
+        time.sleep(0.01)
         print("[ ✔️ ] Initializing Storage...")
-        time.sleep(0.3)
+        time.sleep(0)
         print("[ ❌ ] Mounting /dev...")
-        time.sleep(0.5)
-        print("[ ✔️ ] Mounting /proc...")
         time.sleep(0.2)
+        print("[ ✔️ ] Mounting /proc...")
+        time.sleep(0.1)
         print("[ ✔️ ] Mounting /sys...")
         time.sleep(0.1)
         print("[ ✔️ ] Mounting /run...")
         time.sleep(0.1)
         print("[ ✔️ ] Mounting /home...")
-        time.sleep(0.7)
-        print("[ ✔️ ] Mounting /tmp...")
-        time.sleep(0.7)
-        print("[ ❌ ] Mounting /etc...")
-        time.sleep(9.2)
-        print("[ ✔️ ] Mounting /var...")
-        time.sleep(0.7)
-        print("[ ✔️ ] Mounting /opt...")
-        time.sleep(3.9)
-        print("[ ✔️ ] Retrying - Mounting /dev...")
-        time.sleep(0.5)
-        print("[ ✔️ ] Retrying - Mounting /etc...")
-        time.sleep(4.2)
-        print("[ ✔️ ] Logging in as root...")
-        time.sleep(0.5)
-        print("[ ✔️ ] root executing /etc/..init/boot.py...")
-        time.sleep(0.5)
-        print("[ ✔️ ] root executing /Kernel/main/kernel.py...")
-        time.sleep(0.5)
-        print("[ ✔️ ] root disowning /Kernel...")
-        time.sleep(0.5)
-        print("[ ✔️ ] root disowning /Boot...")
-        time.sleep(0.5)
-        print("[ ✔️ ] Launching user setup...")
-        time.sleep(0.5)
-        print("[ ✔️ ] Creating temp dir in /home as /home/tempusr/...")
-        time.sleep(0.7)
-        print("[ ✔️ ] preparing User setup...")
-        time.sleep(4.2)
-        print("[ ✔️ ] Identifying Data")
-        time.sleep(0.4)
-        print("[ ✔️ ] Loading Archives")
         time.sleep(0.2)
+        print("[ ✔️ ] Mounting /tmp...")
+        time.sleep(0.1)
+        print("[ ❌ ] Mounting /etc...")
+        time.sleep(4.2)
+        print("[ ✔️ ] Mounting /var...")
+        time.sleep(0.2)
+        print("[ ✔️ ] Mounting /opt...")
+        time.sleep(0.3)
+        print("[ ✔️ ] Retrying - Mounting /dev...")
+        time.sleep(0.1)
+        print("[ ✔️ ] Retrying - Mounting /etc...")
+        time.sleep(0.5)
+        print("[ ✔️ ] Logging in as root...")
+        time.sleep(0.2)
+        print("[ ✔️ ] root executing /etc/..init/boot.py...")
+        time.sleep(0.1)
+        print("[ ✔️ ] root executing /Kernel/main/kernel.py...")
+        time.sleep(0.1)
+        print("[ ✔️ ] root disowning /Kernel...")
+        time.sleep(0.3)
+        print("[ ✔️ ] root disowning /Boot...")
+        time.sleep(0.2)
+        print("[ ✔️ ] Launching user setup...")
+        time.sleep(0.1)
+        print("[ ✔️ ] Creating temp dir in /home as /home/tempusr/...")
+        time.sleep(0.2)
+        print("[ ✔️ ] preparing User setup...")
+        time.sleep(0.3)
+        print("[ ✔️ ] Identifying Data")
+        time.sleep(0.2)
+        print("[ ✔️ ] Loading Archives")
+        time.sleep(0.1)
         print("[ ✔️ ] Validating kernel Signature")
-        time.sleep(2.5)
+        time.sleep(4.2)
         print("\n" * 50)
         first_boot_setup()
     else:
@@ -1390,15 +1244,16 @@ if __name__ == "__main__":
         login()
 
     init_commands()
-    print("\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
-    print("\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
-    print("\033[1;32m" + " | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
-    print("\033[1;32m" + " | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
-    print("\033[1;32m" + " | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
-    print("\033[1;32m" + " | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
-    print("\033[1;32m" + " | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
-    print("\033[1;32m" + " |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
-    print("\033[1;32m" + "            /$$  | $$" + "\033[0m")
-    print("\033[1;32m" + "           |  $$$$$$/" + "\033[0m")
-    print("\033[1;32m" + "            \______/" + "\033[0m")
+    print("│" + "\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
+    print("│" + "\033[1;32m" + " | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
+    print("│" + "\033[1;32m" + " |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
+    print("│" + "\033[1;32m" + "            /$$  | $$" + "\033[0m")
+    print("│" + "\033[1;32m" + "           |  $$$$$$/" + "\033[0m")
+    print("│" + "\033[1;32m" + "            \______/" + "\033[0m")
+    print("└───────────────────────────────────────────────")
     shell()
