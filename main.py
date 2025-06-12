@@ -821,9 +821,10 @@ def settings(args):
         print(f"│ Currently logged in as user:{current_user} with permission:{'system' if current_user == 'root' else 'user'}")
         print("│")
         print("├ 1. User Settings")
-        print("├ 2. System Settings")
+        print("├ 2. General")
+        print("├ 3. System")
         print("│")
-        print("├ 3. Exit Settings")
+        print("├ 4. Return to shell")
         print("│")
         print("└─────────────────────────────────────────────────")
 
@@ -834,103 +835,38 @@ def settings(args):
         elif choice == "2":
             system_settings()
         elif choice == "3":
+            system_info()
+        elif choice == "4":
             print("Exiting settings...")
             break
         else:
             print("Invalid option")
 
-def first_boot_setup():
-    """Initial setup when running the system for the first time."""
-    print("┌Welcome to PyShellOS First-Time Setup──────────")
-    print("│Let's create your user account.")
-    print("│")
-
+def system_info():
     while True:
-        username = input("│Enter username: ").strip()
-        if not username:
-            print("│Username cannot be empty")
-            continue
-        if username.lower() == 'root':
-            print("│Cannot use 'root' as username")
-            continue
-        if not username.isalnum():
-            print("│Username must contain only letters and numbers")
-            continue
-        break
+        print("┌System Info────────────────────────────────────")
+        print("│"+"\033[1;32m"+"            OS: PyShellOS-01.02-Beta"+"\033[0m")
+        print(f"│"+"\033[1;32m"+"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
+        print(f"│"+"\033[1;32m"+"  Architecture: {platform.machine()}"+"\033[0m")
+        print(f"│"+"\033[1;32m"+"        Python: {platform.python_version()}"+"\033[0m")
+        print("│"+"\033[1;32m"+"         Shell: PyshellOS-Terminal"+"\033[0m")
+        print("│"+"\033[1;32m"+"        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print("│")
+        print("├ 1. User Settings")
+        print("├ 2. General")
+        print("├ 3. Return")
+        print("│")
+        print("└───────────────────────────────────────────────")
+        choice = input("\nSelect option (1): ").strip()
 
-    while True:
-        password = input("│Enter password: ").strip()
-        if not password:
-            print("│Password cannot be empty")
-            continue
-        confirm_password = input("│Confirm password: ").strip()
-        if password != confirm_password:
-            print("│Passwords do not match")
-            continue
-        break
-
-    # Clear existing users except root
-    global USERS
-    USERS = {
-        "root": {"password": "root"}
-    }
-
-    # Add new user
-    USERS[username] = {"password": password}
-
-    # Update .etc structure
-    fs["/"][".etc"][".userdata"] = {
-        f".{username}": {
-            ".username": username,
-            ".password": password
-        }
-    }
-
-    # Create home directory structure
-    fs["/"]["home"] = {
-        username: {
-            "Documents": {},
-            "Downloads": {},
-            "Desktop": {},
-            "welcome.txt": f"Welcome to PyShellOS, {username}!\nThis is your home directory."
-        }
-    }
-
-    print("│User account created successfully!")
-    print(f"│Username: {username}")
-    print("│System initialization complete.")
-    print("│The system will now start")
-    print("│")
-
-    # Set current user
-    global CURRENT_USER
-    CURRENT_USER = username
-
-    return username
-
-def check_first_boot():
-    """Check if this is the first time the system is running."""
-    try:
-        # Check if any non-root users exist in .userdata
-        userdata = fs["/"][".etc"][".userdata"]
-        user_count = len([k for k in userdata.keys() if k != ".root"])
-        return user_count == 0
-    except:
-        return True
-
-# Load these AFTER the first boot check
-def load_users():
-    """Load users from filesystem."""
-    try:
-        userdata = get_dir(["/", ".etc", ".userdata"])
-        for user_entry in userdata:
-            if user_entry.startswith('.') and user_entry != '.root':
-                username = userdata[user_entry].get('.username')
-                password = userdata[user_entry].get('.password')
-                if username and password:
-                    USERS[username] = {"password": password}
-    except:
-        pass
+        if choice == "1":
+            user_settings()
+        elif choice == "2":
+            system_settings()
+        elif choice == "3":
+            break
+        else:
+            print("Invalid option")
 
 def user_settings():
     """Handle user-related settings."""
@@ -1082,6 +1018,99 @@ def system_settings():
             break
         else:
             print("Invalid option")
+
+def first_boot_setup():
+    """Initial setup when running the system for the first time."""
+    print("┌Welcome to PyShellOS First-Time Setup──────────")
+    print("│Let's create your user account.")
+    print("│")
+
+    while True:
+        username = input("│Enter username: ").strip()
+        if not username:
+            print("│Username cannot be empty")
+            continue
+        if username.lower() == 'root':
+            print("│Cannot use 'root' as username")
+            continue
+        if not username.isalnum():
+            print("│Username must contain only letters and numbers")
+            continue
+        break
+
+    while True:
+        password = input("│Enter password: ").strip()
+        if not password:
+            print("│Password cannot be empty")
+            continue
+        confirm_password = input("│Confirm password: ").strip()
+        if password != confirm_password:
+            print("│Passwords do not match")
+            continue
+        break
+
+    # Clear existing users except root
+    global USERS
+    USERS = {
+        "root": {"password": "root"}
+    }
+
+    # Add new user
+    USERS[username] = {"password": password}
+
+    # Update .etc structure
+    fs["/"][".etc"][".userdata"] = {
+        f".{username}": {
+            ".username": username,
+            ".password": password
+        }
+    }
+
+    # Create home directory structure
+    fs["/"]["home"] = {
+        username: {
+            "Documents": {},
+            "Downloads": {},
+            "Desktop": {},
+            "welcome.txt": f"Welcome to PyShellOS, {username}!\nThis is your home directory."
+        }
+    }
+
+    print("│User account created successfully!")
+    print(f"│Username: {username}")
+    print("│System initialization complete.")
+    print("│The system will now start")
+    print("│")
+
+    # Set current user
+    global CURRENT_USER
+    CURRENT_USER = username
+
+    return username
+
+def check_first_boot():
+    """Check if this is the first time the system is running."""
+    try:
+        # Check if any non-root users exist in .userdata
+        userdata = fs["/"][".etc"][".userdata"]
+        user_count = len([k for k in userdata.keys() if k != ".root"])
+        return user_count == 0
+    except:
+        return True
+
+# Load these AFTER the first boot check
+def load_users():
+    """Load users from filesystem."""
+    try:
+        userdata = get_dir(["/", ".etc", ".userdata"])
+        for user_entry in userdata:
+            if user_entry.startswith('.') and user_entry != '.root':
+                username = userdata[user_entry].get('.username')
+                password = userdata[user_entry].get('.password')
+                if username and password:
+                    USERS[username] = {"password": password}
+    except:
+        pass
 
 # more infos
 def users(args):
