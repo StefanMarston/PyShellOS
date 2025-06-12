@@ -1306,6 +1306,7 @@ def init_commands():
     })
 
 
+
 # Update the main block to use login()
 if __name__ == "__main__":
     print("Booting PyShellOS...")
