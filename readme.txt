@@ -5,3 +5,4 @@ This is a basic installation guide for PyShellOS.
 3. execute "py main.py" to run the operating system.
 4. On first boot you'll notice it takes a long time. On reboot it'll be quicker.
 5. If you have ay questions, either run "help" in the os or dm me on discord (.stefanmarston)
+
