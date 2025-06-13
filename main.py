@@ -1210,15 +1210,15 @@ def users(args):
     if not is_sudo_active():
         print("users: Permission denied (requires sudo)")
         return
-    
+
     print("\nSystem Users:")
     print("-" * 30)
     print(f"{'Username':<20} {'Type'}")
     print("-" * 30)
-    
+
     # First show root user
     print(f"{'root':<20} {'system'}")
-    
+
     # Then show other users
     for username in USERS:
         if username != "root":
@@ -1351,7 +1351,6 @@ if __name__ == "__main__":
     else:
         load_users()
         login()
-
     init_commands()
     print(f"│" + "\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
     print(f"│" + "\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
