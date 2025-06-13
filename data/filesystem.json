@@ -59,12 +59,7 @@
             ".hpet,txt": {}
         },
         ".etc": {
-            ".userdata": {
-                ".Stefan": {
-                    ".username": "Stefan",
-                    ".password": "Stekil2008"
-                }
-            }
+            ".userdata": {}
         },
         "lib": {},
         "home": {
