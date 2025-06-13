@@ -9,18 +9,63 @@ import platform
 import urllib.request
 import os
 import sys
+import threading
+import time
+
+
+def autosave_fs(interval=10):
+    while True:
+        time.sleep(interval)
+        with open("data/filesystem.json", "w") as f:
+            json.dump(fs, f, indent=4)
+
+
+threading.Thread(target=autosave_fs, daemon=True).start()
 
 
 def update_main_py_and_restart():
-    url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/main.py"
+    main_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/main.py"
+    fs_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/data/filesystem.json"
     local_path = os.path.abspath(sys.argv[0])
+    fs_path = os.path.join(os.path.dirname(local_path), "data", "filesystem.json")
 
     print("[ ✓ ] fetching update...")
-    time.sleep(random.randint(1, 15))
-    urllib.request.urlretrieve(url, local_path)
+    time.sleep(random.randint(1, 3))  # Etwas kürzer, sonst nervt es beim Testen
 
-    print("[ ✓ ] Update successfull. rebooting...")
-    time.sleep(3)
+    # main.py herunterladen und ersetzen
+    urllib.request.urlretrieve(main_url, local_path)
+    print("[ ✓ ] System was updated.")
+
+    # filesystem.json mit Erhalt von .userdata aktualisieren
+    def merge_filesystem_userdata(fs_url, fs_path):
+        # Bestehende userdata laden
+        if os.path.exists(fs_path):
+            with open(fs_path, "r") as f:
+                local_fs = json.load(f)
+            local_userdata = local_fs.get("/", {}).get(".etc", {}).get(".userdata", {})
+        else:
+            local_userdata = {}
+
+        # Neue Datei von GitHub laden
+        with urllib.request.urlopen(fs_url) as response:
+            new_fs = json.load(response)
+
+        # userdata mergen
+        if "/" in new_fs and ".etc" in new_fs["/"]:
+            new_fs["/"][".etc"][".userdata"] = local_userdata
+        else:
+            print("[ ! ]: New filesystem.json is corrupted!")
+
+        # Neue Version speichern
+        os.makedirs(os.path.dirname(fs_path), exist_ok=True)
+        with open(fs_path, "w") as f:
+            json.dump(new_fs, f, indent=4)
+        print("[ ✓ ] filesystem.json was updated.")
+
+    merge_filesystem_userdata(fs_url, fs_path)
+
+    print("[ ✓ ] Update successful. Rebooting...")
+    time.sleep(2)
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
@@ -1308,16 +1353,16 @@ if __name__ == "__main__":
         login()
 
     init_commands()
-    print("│" + "\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
-    print("│" + "\033[1;32m" + " | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
-    print("│" + "\033[1;32m" + " |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
-    print("│" + "\033[1;32m" + "            /$$  | $$" + "\033[0m")
-    print("│" + "\033[1;32m" + "           |  $$$$$$/" + "\033[0m")
-    print("│" + "\033[1;32m" + "            \______/" + "\033[0m")
-    print("└───────────────────────────────────────────────")
+    print(f"│" + "\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
+    print(f"│" + "\033[1;32m" + "            /$$  | $$" + "\033[0m")
+    print(f"│" + "\033[1;32m" + "           |  $$$$$$/" + "\033[0m")
+    print(f"│" + "\033[1;32m" + "            \______/" + "\033[0m")
+    print(f"└───────────────────────────────────────────────")
     shell()
