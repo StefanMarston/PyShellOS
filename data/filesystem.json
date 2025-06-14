@@ -59,18 +59,10 @@
             ".hpet,txt": {}
         },
         ".etc": {
-            ".userdata": {
-            }
+            ".userdata": {}
         },
         "lib": {},
-        "home": {
-            "Stefan": {
-                "Documents": {},
-                "Downloads": {},
-                "Desktop": {},
-                "welcome.txt": "Welcome to PyShellOS, Stefan!\nThis is your home directory."
-            }
-        },
+        "home": {},
         "lib-usr": {},
         "lib64": {},
         "media": {},
@@ -103,6 +95,8 @@
             ".var": {},
             ".debug.txt": "0x0000000102612000 1024",
             ".snap.txt": "0x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 1024"
-        }
+        },
+        "q.txt": "e",
+        ".e.txt": ""
     }
 }
