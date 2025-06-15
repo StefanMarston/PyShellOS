@@ -11,6 +11,7 @@ import os
 import sys
 import threading
 import time
+from random import choice
 
 
 def autosave_fs(interval=10):
@@ -104,6 +105,19 @@ def get_dir(path_list):
         d = d.get(p, {})
     return d
 
+def repair():
+    while True:
+        print("┌\033[1;32m" + "\033[1m" + "Repair PyShellOS" + "\033[0m" + "───────────────────────────────")
+        print("├   \033[1;32" + "Repair PyShellOS" + "\033[0m")
+        print("│")
+        choice = input("├   Select option (1-2): ").strip()
+
+        if choice == "1":
+            update_main_py_and_restart()
+        elif choice == "2":
+            break
+        else:
+            print("Invalid option")
 
 def set_dir_value(path_list, value):
     """Set a value in the virtual filesystem at the specified path."""
