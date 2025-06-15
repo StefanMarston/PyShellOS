@@ -1345,7 +1345,7 @@ if __name__ == "__main__":
     if is_first_boot:
         print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Detected first boot... This could take a moment...")
         time.sleep(0.3)
-        print("\n[  " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Please wait")
+        print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Please wait")
         time.sleep(0.5)
         print("\n" * 50)
         first_boot_setup()
