@@ -652,13 +652,13 @@ def help_cmd(args):
 
 
 def shell():
-    print("\033[1;32m" + "Welcome to Enhanced PyShellOS!" + "\033[0m")
     print("Type 'help' for command list")
 
     while LOGGED_IN:
         current_user = get_current_username()
         path = "/" if len(cwd) == 1 else "/" + "/".join(cwd[1:])
-        prompt = f"\033[1;34m{current_user}@pyos\033[0m:\033[1;33m{path}\033[0m$ "
+        print(f"\033[1;32m╔═{current_user}@pyos══════")
+        prompt = f"╚═{path}" + "\033[0m$"
         try:
             cmd_input = input(prompt).strip()
             if not cmd_input:
@@ -878,20 +878,20 @@ def settings(args):
 
     while True:
         current_user = get_current_username()
-        print("┌Settings Shell Application─────────────────────")
+        print("┌\033[1;32m" + "\033[1m" + "Settings Shell Application" + "\033[0m" + "─────────────────────")
         print("│")
-        print(f"│ Currently logged in as user:{current_user} with permission:{'system' if current_user == 'root' else 'user'}")
+        print("│ Currently logged in as user: " + "\033[1;32m" + f"{current_user} " + "\033[0m" + "with permission: " + "\033[1;32m" + f"{'system' if current_user == 'root' else 'user'}" + "\033[0m")
         print("│")
-        print("├ 1. User Settings")
-        print("├ 2. General")
-        print("├ 3. System")
-        print("├ 4. Update PyShellOS")
+        print("├   " + "\033[1;32m" + "1. User Settings" + "\033[0m")
+        print("├   " + "\033[1;32m" + "2. General" + "\033[0m")
+        print("├   " + "\033[1;32m" + "3. System" + "\033[0m")
+        print("├   " + "\033[1;32m" + "4. Update PyShellOS" + "\033[0m")
         print("│")
-        print("├ 5. Return to shell")
+        print("├   " + "\033[1;32m" + "5. Return to shell" + "\033[0m")
         print("│")
         print("└─────────────────────────────────────────────────")
 
-        choice = input("\nSelect option (1-3): ").strip()
+        choice = input("\nSelect option (1-5): ").strip()
 
         if choice == "1":
             user_settings()
@@ -909,19 +909,19 @@ def settings(args):
 
 def system_info():
     while True:
-        print("┌System Info────────────────────────────────────")
+        print("┌\033[1;32m\033" + "\033[1m" + "System Info" + "\033[0m" + "────────────────────────────────────")
         print("│"+"\033[1;32m"+"            OS: PyShellOS-01.02-Beta"+"\033[0m")
-        print(f"│"+"\033[1;32m"+"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
-        print(f"│"+"\033[1;32m"+"  Architecture: {platform.machine()}"+"\033[0m")
-        print(f"│"+"\033[1;32m"+"        Python: {platform.python_version()}"+"\033[0m")
+        print("│"+"\033[1;32m"+f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
+        print("│"+"\033[1;32m"+f"  Architecture: {platform.machine()}"+"\033[0m")
+        print("│"+"\033[1;32m"+f"        Python: {platform.python_version()}"+"\033[0m")
         print("│"+"\033[1;32m"+"         Shell: PyshellOS-Terminal"+"\033[0m")
         print("│"+"\033[1;32m"+"        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
         print("│"+"\033[1;32m"+"     Publisher: Stefan Kilber"+"\033[0m")
         print("│"+"\033[1;32m"+"          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
         print("│")
-        print("├ 1. User Settings")
-        print("├ 2. General")
-        print("├ 3. Return")
+        print("├   " + "\033[1;32m" + "1. User Settings" + "\033[0m")
+        print("├   " + "\033[1;32m" + "2. General" + "\033[0m")
+        print("├   " + "\033[1;32m" + "3. Return" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
         choice = input("\nSelect option (1): ").strip()
@@ -939,16 +939,16 @@ def user_settings():
     """Handle user-related settings."""
     while True:
         current_user = get_current_username()
-        print("┌User Settings──────────────────────────────────")
+        print("┌\033[1;32m\033" + "\033[1m" + "User Settings" + "\033[0m" + "──────────────────────────────────")
         print("|")
-        print(f"│ Currently logged in as user: {current_user}")
+        print("│ Currently logged in as user: " + "\033[32m" + f"{current_user}" + "\033[0m")
         print("│")
-        print("├ 1. Change Username")
-        print("├ 2. Change Password")
-        print("├ 3. Add User")
-        print("├ 4. Remove User")
+        print("├   " + "\033[1;32m" + "1. Change Username" + "\033[0m")
+        print("├   " + "\033[1;32m" + "2. Change Password" + "\033[0m")
+        print("├   " + "\033[1;32m" + "3. Add User" + "\033[0m")
+        print("├   " + "\033[1;32m" + "4. Remove User" + "\033[0m")
         print("│")
-        print("├ 5. Back")
+        print("├   " + "\033[1;32m" + "5. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
@@ -1011,16 +1011,16 @@ def user_settings():
 
 def update_settings():
     while True:
-        print("┌Update Settings────────────────────────────────")
+        print("┌\033[1;32m\033" + "\033[1m" + "Update Settings" + "\033[0m" + "────────────────────────────────")
         print("│")
         print("├    Current Version: PyShellOS-01.02-Beta")
-        print("├ 1. Update version")
+        print("├   " + "\033[1;32m" + "1. Update version" + "\033[0m")
         print("│")
-        print("├ 2. Back")
+        print("├   " + "\033[1;32m" + "2. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
-        choice = input("\nSelect option (1-3): ").strip()
+        choice = input("\nSelect option (1-2): ").strip()
 
         if choice == "1":
             update_main_py_and_restart()
@@ -1034,18 +1034,18 @@ def update_settings():
 def system_settings():
     """Handle system-related settings."""
     while True:
-        print("┌System Settings────────────────────────────────")
+        print("┌\033[1;32m\033" + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
         print("│")
-        print("├ 1. Reset PyShellOS")
-        print("├ 2. Restart PyShellOS")
-        print("├ 3. Bulk Remove All Users")
-        print("├ 4. Show security Info")
+        print("├   " + "\033[1;32m" + "1. Reset PyShellOS" + "\033[0m" + "\033[0m")
+        print("├   " + "\033[1;32m" + "2. Restart PyShellOS" + "\033[0m" + "\033[0m")
+        print("├   " + "\033[1;32m" + "3. Bulk Remove All Users" + "\033[0m" + "\033[0m")
+        print("├   " + "\033[1;32m" + "4. Show security Info" + "\033[0m" + "\033[0m")
         print("│")
-        print("├ 6. Back")
+        print("├   " + "\033[1;32m" + "5. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
-        choice = input("\nSelect option (1-4): ").strip()
+        choice = input("\nSelect option (1-5): ").strip()
 
         if choice == "1":
             confirm = input("Are you sure you want to reset PyShellOS? This will erase all data! (type 'RESET' to confirm): ")
@@ -1109,31 +1109,32 @@ def system_settings():
 
 def first_boot_setup():
     """Initial setup when running the system for the first time."""
-    print("┌Welcome to PyShellOS First-Time Setup──────────")
-    print("│Let's create your user account.")
+    print(f"┌" + "\033[1;32m" + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + "──────────")
+    print("│")
+    print(f"├" + "\033[1;32m" + "Let's create your user account." + "\033[0m")
     print("│")
 
     while True:
-        username = input("│Enter username: ").strip()
+        username = input(f"├" + "\033[1;32m" + "Enter username: " + "\033[0m").strip()
         if not username:
-            print("│Username cannot be empty")
+            print("├" + "\033[91m" + "Username cannot be empty" + "\033[0m")
             continue
         if username.lower() == 'root':
-            print("│Cannot use 'root' as username")
+            print("├" + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
             continue
         if not username.isalnum():
-            print("│Username must contain only letters and numbers")
+            print("├" + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
             continue
         break
 
     while True:
-        password = input("│Enter password: ").strip()
+        password = input("├" + "\033[1;32m" + "Enter password: " + "\033[0m").strip()
         if not password:
-            print("│Password cannot be empty")
+            print("├" + "\033[91m" + "Password cannot be empty" + "\033[0m")
             continue
-        confirm_password = input("│Confirm password: ").strip()
+        confirm_password = input("├" + "\033[1;32m" + "Confirm password: " + "\033[0m").strip()
         if password != confirm_password:
-            print("│Passwords do not match")
+            print("├" + "\033[91m" + "Passwords do not match" + "\033[0m")
             continue
         break
 

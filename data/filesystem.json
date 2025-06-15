@@ -59,12 +59,10 @@
             ".hpet,txt": {}
         },
         ".etc": {
-            ".userdata": {
-            }
+            ".userdata": {}
         },
         "lib": {},
-        "home": {
-        },
+        "home": {},
         "lib-usr": {},
         "lib64": {},
         "media": {},
