@@ -831,7 +831,7 @@ def login():
             if login_attempts[username]['attempts'] >= max_attempts:
                 # Lock the account
                 login_attempts[username]['locked_until'] = time.time() + lockout_time
-                print(f"Too many failed attempts. Account locked for {lockout_time} seconds.")
+                print(f"Too many failed attempts. User locked for {lockout_time} seconds.")
             else:
                 print(f"Incorrect password! {attempts_left} attempt{'s' if attempts_left > 1 else ''} remaining.")
             continue
