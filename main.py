@@ -112,6 +112,7 @@ def repair():
         print("│")
         choice = input("├   Select option (1-2): ").strip()
 
+
         if choice == "1":
             update_main_py_and_restart()
         elif choice == "2":
