@@ -810,7 +810,7 @@ def login():
             current_time = time.time()
             if current_time < login_attempts[username]['locked_until']:
                 remaining_time = int(login_attempts[username]['locked_until'] - current_time)
-                print(f"Account locked. Try again in {remaining_time} seconds.")
+                print(f"User locked. Try again in {remaining_time} seconds.")
                 time.sleep(1)  # Small delay to prevent rapid retries
                 continue
             else:
