@@ -1071,7 +1071,6 @@ def system_settings():
                 # Reset filesystem to initial state
                 global fs, USERS
                 fs = {"/": {
-    "/": {
         "trash": {},
         "bin": {
             "x11": {},
@@ -1132,20 +1131,10 @@ def system_settings():
         },
         ".etc": {
             ".userdata": {
-                ".Stefan": {
-                    ".username": "Stefan",
-                    ".password": "Stekil2008"
-                }
             }
         },
         "lib": {},
         "home": {
-            "Stefan": {
-                "Documents": {},
-                "Downloads": {},
-                "Desktop": {},
-                "welcome.txt": "Welcome to PyShellOS, Stefan!\nThis is your home directory."
-            }
         },
         "lib-usr": {},
         "lib64": {},
@@ -1183,7 +1172,7 @@ def system_settings():
         "q.txt": "e",
         ".e.txt": ""
     }
-}}
+}
 
                 USERS = {"root": {"password": "root"}}
                 print("OS reset complete!")
