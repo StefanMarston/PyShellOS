@@ -822,6 +822,7 @@ def login():
         if username not in login_attempts:
             login_attempts[username] = {'attempts': 0}
 
+
         password = input("Password: ")
         if password != USERS[username]["password"]:
             # Increment failed attempts
