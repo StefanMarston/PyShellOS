@@ -818,6 +818,7 @@ def login():
                 if username in login_attempts:
                     login_attempts[username] = {'attempts': 0}
 
+
         # Initialize attempt counter for this user if not already done
         if username not in login_attempts:
             login_attempts[username] = {'attempts': 0}
