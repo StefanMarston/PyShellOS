@@ -1071,21 +1071,119 @@ def system_settings():
                 # Reset filesystem to initial state
                 global fs, USERS
                 fs = {"/": {
-                    "bin": {},
-                    "boot": {},
-                    "home": {},
-                    ".etc": {
-                        ".userdata": {
-                            ".root": {
-                                ".username": "root",
-                                ".password": "root"
-                            }
-                        }
+    "/": {
+        "trash": {},
+        "bin": {
+            "x11": {},
+            ".[": {},
+            ".7z": {},
+            ".7zA": {},
+            ".7zR": {},
+            ".aConnect.txt": "cnct",
+            ".add2line.txt": "x0010"
+        },
+        ".bin-usr": {},
+        "boot": {
+            ".efi": {
+                "EFI": {
+                    ".BOOT": {
+                        ".bootx65.efi": {},
+                        ".fbx64.efi": {},
+                        ".mmx64.efi": {}
                     },
-                    ".root": {
-                        ".sudopswd": "root"
+                    "PyShellOS": {
+                        ".BOOTX64.CSV": {},
+                        ".grub.cfg": {},
+                        ".grub64.efi": {},
+                        ".mmx64.efi": {},
+                        ".shimx64.efi": {}
                     }
-                }}
+                }
+            },
+            ".kernel": {
+                ".irq": {
+                    ".0.txt": "false",
+                    ".1.txt": "true"
+                },
+                "vmcoreinfo.txt": "vmcoreinfo // 0x0000000102612000 1024",
+                "crashhandler.txt": "917616"
+            },
+            ".grub": {
+                "fonts": {
+                    "unicode.txt": "aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ1234567890!\u00a7$%&/()=?`*'_:;,.-#+\u00b4"
+                },
+                "..locale": {
+                    "HIDDEN_DATA": {},
+                    "HIDDEN_DATAx": {}
+                }
+            },
+            ".config-1.1-1.2-genericK.txt": "hidden data"
+        },
+        "cdrom": {},
+        "dev": {
+            "block": {},
+            "bugrps": {},
+            "..bus": {},
+            "..char": {},
+            ".console.txt": {},
+            ".core.txt": {},
+            ".full.txt": {},
+            ".hpet,txt": {}
+        },
+        ".etc": {
+            ".userdata": {
+                ".Stefan": {
+                    ".username": "Stefan",
+                    ".password": "Stekil2008"
+                }
+            }
+        },
+        "lib": {},
+        "home": {
+            "Stefan": {
+                "Documents": {},
+                "Downloads": {},
+                "Desktop": {},
+                "welcome.txt": "Welcome to PyShellOS, Stefan!\nThis is your home directory."
+            }
+        },
+        "lib-usr": {},
+        "lib64": {},
+        "media": {},
+        "mnt": {},
+        "opt": {},
+        "proc": {},
+        ".root": {
+            ".critical": "0x0000000102612000 1024",
+            ".sudopswd": "root"
+        },
+        "run": {},
+        "sbin": {},
+        "sbin-usr": {},
+        "snap": {},
+        "lndk": {
+            "Downloaded": {}
+        },
+        "srv": {},
+        ".sys": {
+            ".block": {},
+            ".dev": {},
+            ".fs": {},
+            ".firmware": {},
+            "PyShellOS-License": {
+                "PyShellOS-License.txt": "Owned by Stefan Kilber @2025",
+                "PyShellM.txt": "Owned by Stefan Kilber @2025"
+            },
+            "tmp": {},
+            "usr": {},
+            ".var": {},
+            ".debug.txt": "0x0000000102612000 1024",
+            ".snap.txt": "0x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 10240x0000000102612000 1024"
+        },
+        "q.txt": "e",
+        ".e.txt": ""
+    }
+}}
 
                 USERS = {"root": {"password": "root"}}
                 print("OS reset complete!")
