@@ -323,8 +323,8 @@ def date(args):
 # Update get_current_username function
 def get_current_username():
     """Get the current username"""
-    global current_user
-    return current_user
+    global CURRENT_USER
+    return CURRENT_USER
 
 
 def whoami(args):
