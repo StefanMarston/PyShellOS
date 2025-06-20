@@ -295,6 +295,7 @@ def echo(args):
     text = " ".join(args)
     redirect_idx = -1
 
+
     if ">" in args:
         redirect_idx = args.index(">")
         text = " ".join(args[:redirect_idx])
