@@ -299,6 +299,7 @@ def echo(args):
         redirect_idx = args.index(">")
         text = " ".join(args[:redirect_idx])
 
+
     if redirect_idx != -1 and len(args) > redirect_idx + 1:
         filename = args[redirect_idx + 1]
         if not filename.endswith('.txt'):
