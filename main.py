@@ -273,6 +273,7 @@ def cat(args):
     name = args[0]
     d = get_dir(cwd)
 
+
     if not has_permission(name):
         print(f"cat: Permission denied: '{name}'")
         return
