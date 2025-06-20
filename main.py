@@ -277,6 +277,7 @@ def cat(args):
         print(f"cat: Permission denied: '{name}'")
         return
 
+
     if name in d and isinstance(d[name], str):
         if "-n" in args:  # show line numbers
             for i, line in enumerate(d[name].split('\n'), 1):
