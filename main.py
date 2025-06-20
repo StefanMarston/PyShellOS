@@ -292,6 +292,7 @@ def echo(args):
     if len(args) < 1:
         return
 
+
     text = " ".join(args)
     redirect_idx = -1
 
