@@ -248,6 +248,7 @@ def cd(args):
         return
     target = args[0]
 
+
     if target == "~" or target == "/":
         cwd = ["/"]
         return
