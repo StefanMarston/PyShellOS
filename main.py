@@ -320,6 +320,7 @@ def date(args):
     """Show current date and time."""
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
+
 # Update get_current_username function
 def get_current_username():
     """Get the current username"""
