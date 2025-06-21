@@ -220,6 +220,7 @@ def sudo(args):
         SUDO_MODE = False  # Disable sudo mode if command not found
         print(f"sudo: command '{cmd}' not found")
 
+
 def ls(args):
     """List directory contents with optional flags."""
     d = get_dir(cwd)
