@@ -170,6 +170,7 @@ def sudo(args):
     if current_time > SUDO_LOCKED_UNTIL and SUDO_ATTEMPT_COUNTER >= 3:
         SUDO_ATTEMPT_COUNTER = 0
 
+
     try:
         stored_password = get_dir(["/", ".root"])[".sudopswd"]
     except:
