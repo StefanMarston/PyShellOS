@@ -140,6 +140,7 @@ def has_permission(path_name):
     if path_name.startswith('.') and path_name != f".{CURRENT_USER}":
         return False
 
+
     return True
 
 
