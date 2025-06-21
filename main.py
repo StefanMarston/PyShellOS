@@ -161,6 +161,7 @@ def sudo(args):
     global SUDO_ATTEMPT_COUNTER, SUDO_LOCKED_UNTIL
     current_time = time.time()
 
+
     if current_time < SUDO_LOCKED_UNTIL:
         remaining_time = int(SUDO_LOCKED_UNTIL - current_time)
         print(f"sudo: Authentication locked for {remaining_time} more seconds due to too many failed attempts")
