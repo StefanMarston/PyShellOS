@@ -166,6 +166,7 @@ def sudo(args):
         print(f"sudo: Authentication locked for {remaining_time} more seconds due to too many failed attempts")
         return
 
+
     # Reset lock if it has expired
     if current_time > SUDO_LOCKED_UNTIL and SUDO_ATTEMPT_COUNTER >= 3:
         SUDO_ATTEMPT_COUNTER = 0
