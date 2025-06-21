@@ -20,10 +20,17 @@ cd C:\Downloads\PyShellOS\
 py main.py
 ```
 
-The current version does NOT include an online updater, means if you want to update your OS check out the Releases on GitHub.
-The current OS is running on 01.01-Beta.
+Verion PyShellOS-01.02-Beta or newer support live updates means you don't have to manually update the files!
 
+to update your system use:
 
+```shell
+sudo settings
+sudo password: (password)
+choose option 4
+choose option 1
+and wait
+```
 
 Basic command usage:
 
