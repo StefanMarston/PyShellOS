@@ -142,6 +142,7 @@ def has_permission(path_name):
 
     return True
 
+
 # Update is_sudo_active function
 def is_sudo_active():
     """Check if we
