@@ -192,6 +192,7 @@ def sudo(args):
     # Reset counter on successful authentication
     SUDO_ATTEMPT_COUNTER = 0
 
+
     global SUDO_MODE
     SUDO_MODE = True  # Enable sudo mode
 
