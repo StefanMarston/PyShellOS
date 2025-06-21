@@ -157,6 +157,7 @@ def sudo(args):
         print("sudo: Missing command")
         return
 
+
     # Check if sudo is temporarily locked
     global SUDO_ATTEMPT_COUNTER, SUDO_LOCKED_UNTIL
     current_time = time.time()
