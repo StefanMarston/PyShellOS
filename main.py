@@ -233,6 +233,7 @@ def ls(args):
         print("  ".join(visible_items.keys()))
         return
 
+
     if "-l" in args:  # detailed listing
         for item in visible_items.keys():
             type_marker = "d" if isinstance(d[item], dict) else "f"
