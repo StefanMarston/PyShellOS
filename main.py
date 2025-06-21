@@ -176,6 +176,7 @@ def sudo(args):
         print("sudo: Cannot access sudo password file")
         return
 
+
     input_password = input("[sudo] password for user: ")
     if input_password != stored_password:
         SUDO_ATTEMPT_COUNTER += 1
