@@ -190,6 +190,7 @@ def sudo(args):
             print(f"sudo: Incorrect password. {attempts_left} attempt{'s' if attempts_left > 1 else ''} remaining.")
         return
 
+
     # Reset counter on successful authentication
     SUDO_ATTEMPT_COUNTER = 0
 
