@@ -181,6 +181,7 @@ def sudo(args):
         SUDO_ATTEMPT_COUNTER += 1
         attempts_left = 3 - SUDO_ATTEMPT_COUNTER
 
+
         if SUDO_ATTEMPT_COUNTER >= 3:
             # Lock sudo for 60 seconds after 3 failed attempts
             SUDO_LOCKED_UNTIL = current_time + 60
