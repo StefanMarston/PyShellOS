@@ -151,6 +151,7 @@ def is_sudo_active():
 
 SUDO_MODE = False  # Global variable to track sudo status
 
+
 def sudo(args):
     """Execute command with root privileges."""
     if len(args) < 1:
