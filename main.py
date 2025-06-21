@@ -149,6 +149,7 @@ def is_sudo_active():
     global SUDO_MODE
     return SUDO_MODE
 
+
 SUDO_MODE = False  # Global variable to track sudo status
 
 
