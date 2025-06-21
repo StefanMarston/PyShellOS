@@ -195,6 +195,7 @@ def sudo(args):
     global SUDO_MODE
     SUDO_MODE = True  # Enable sudo mode
 
+
     cmd = args[0]
 
 
