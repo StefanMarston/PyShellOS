@@ -58,6 +58,7 @@ def update_main_py_and_restart():
         else:
             print("[ ! ]: New filesystem.json is corrupted!")
 
+
         # Neue Version speichern
         os.makedirs(os.path.dirname(fs_path), exist_ok=True)
         with open(fs_path, "w") as f:
