@@ -83,6 +83,7 @@ USERS = {
 with open("data/filesystem.json", "r") as f:
     fs = json.load(f)
 
+
 cwd = ["/"]  # current working directory as list
 USER = "user"
 LOGGED_IN = True
