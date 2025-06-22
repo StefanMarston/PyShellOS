@@ -89,6 +89,7 @@ USER = "user"
 LOGGED_IN = True
 CLIPBOARD = None
 
+
 # Add this after the other global variables (CURRENT_USER, USERS, etc.)
 # but before any function definitions
 
