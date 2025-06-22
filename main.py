@@ -31,6 +31,7 @@ def update_main_py_and_restart():
     local_path = os.path.abspath(sys.argv[0])
     fs_path = os.path.join(os.path.dirname(local_path), "data", "filesystem.json")
 
+
     print("[ ✓ ] fetching update...")
     time.sleep(random.randint(1, 3))  # Etwas kürzer, sonst nervt es beim Testen
 
