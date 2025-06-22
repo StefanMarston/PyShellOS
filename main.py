@@ -38,6 +38,7 @@ def update_main_py_and_restart():
     urllib.request.urlretrieve(main_url, local_path)
     print("[ ✓ ] System was updated.")
 
+
     # filesystem.json mit Erhalt von .userdata aktualisieren
     def merge_filesystem_userdata(fs_url, fs_path):
         # Bestehende userdata laden
