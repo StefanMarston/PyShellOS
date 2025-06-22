@@ -66,6 +66,7 @@ def update_main_py_and_restart():
 
     merge_filesystem_userdata(fs_url, fs_path)
 
+
     print("[ ✓ ] Update successful. Rebooting...")
     time.sleep(2)
     os.execv(sys.executable, [sys.executable] + sys.argv)
