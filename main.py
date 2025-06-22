@@ -96,6 +96,7 @@ CLIPBOARD = None
 # Initialize empty commands dictionary
 commands = {}
 
+
 # Security variables
 SUDO_ATTEMPT_COUNTER = 0
 SUDO_LOCKED_UNTIL = 0
