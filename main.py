@@ -64,6 +64,7 @@ def update_main_py_and_restart():
             json.dump(new_fs, f, indent=4)
         print("[ ✓ ] filesystem.json was updated.")
 
+
     merge_filesystem_userdata(fs_url, fs_path)
 
 
