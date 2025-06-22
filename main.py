@@ -93,6 +93,7 @@ CLIPBOARD = None
 # Add this after the other global variables (CURRENT_USER, USERS, etc.)
 # but before any function definitions
 
+
 # Initialize empty commands dictionary
 commands = {}
 
