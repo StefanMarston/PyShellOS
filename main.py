@@ -52,6 +52,7 @@ def update_main_py_and_restart():
         with urllib.request.urlopen(fs_url) as response:
             new_fs = json.load(response)
 
+
         # userdata mergen
         if "/" in new_fs and ".etc" in new_fs["/"]:
             new_fs["/"][".etc"][".userdata"] = local_userdata
