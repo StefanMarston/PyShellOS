@@ -48,6 +48,7 @@ def update_main_py_and_restart():
         else:
             local_userdata = {}
 
+
         # Neue Datei von GitHub laden
         with urllib.request.urlopen(fs_url) as response:
             new_fs = json.load(response)
