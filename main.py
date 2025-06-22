@@ -136,6 +136,7 @@ def has_permission(path_name):
     if CURRENT_USER == "root" or is_sudo_active():
         return True
 
+
     # Check for home directory access
     if path_name.startswith('.') and path_name != f".{CURRENT_USER}":
         return False
