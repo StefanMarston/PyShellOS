@@ -34,6 +34,7 @@ def update_main_py_and_restart():
     print("[ ✓ ] fetching update...")
     time.sleep(random.randint(1, 3))  # Etwas kürzer, sonst nervt es beim Testen
 
+
     # main.py herunterladen und ersetzen
     urllib.request.urlretrieve(main_url, local_path)
     print("[ ✓ ] System was updated.")
