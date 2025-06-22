@@ -79,6 +79,7 @@ USERS = {
     "root": {"password": "root"}
 }
 
+
 # === Load virtual filesystem ===
 with open("data/filesystem.json", "r") as f:
     fs = json.load(f)
