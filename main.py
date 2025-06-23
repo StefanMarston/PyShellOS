@@ -1390,6 +1390,7 @@ def neofetch(args=None):
     print(f"            |  $$$$$$/")
     print(f"             \______/")
 
+
 # Then at the bottom of the file, after all function definitions but before shell()
 def init_commands():
     global commands
