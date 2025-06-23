@@ -1486,6 +1486,7 @@ if __name__ == "__main__":
     time.sleep(random.randint(1, 3))
     print("\n" * 50)
 
+
     is_first_boot = check_first_boot()
     if is_first_boot:
         print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Detected first boot... This could take a moment...")
