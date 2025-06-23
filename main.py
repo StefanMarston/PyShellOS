@@ -1375,6 +1375,7 @@ def neofetch(args=None):
 
     total, used, free = shutil.disk_usage("/")
 
+
     """Show system information."""
     print("\n=== PyShellOS System Information ===")
     print("\nSystem Information:")
