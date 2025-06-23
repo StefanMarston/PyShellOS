@@ -1370,6 +1370,7 @@ def users(args):
         if username != "root":
             print(f"{username:<20} {'user'}")
 
+
 def neofetch(args=None):
     now = datetime.now()
 
