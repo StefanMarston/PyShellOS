@@ -1364,7 +1364,8 @@ def users(args):
     
     # First show root user
     print(f"{'root':<20} {'system'}")
-    
+
+
     # Then show other users
     for username in USERS:
         if username != "root":
