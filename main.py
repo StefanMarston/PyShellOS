@@ -713,8 +713,8 @@ def shell():
     while LOGGED_IN:
         current_user = get_current_username()
         path = "/" if len(cwd) == 1 else "/" + "/".join(cwd[1:])
-        print(f"\033[1;32m╔═{current_user}@pyos══════")
-        prompt = f"╚═{path}" + "\033[0m$"
+        print(f"\033[1;32m╔═{current_user}@pyos [{path}]")
+        prompt = f"╚═" + "\033[0m$"
         try:
             cmd_input = input(prompt).strip()
             if not cmd_input:
