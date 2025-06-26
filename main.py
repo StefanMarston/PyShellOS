@@ -1417,75 +1417,81 @@ def first_boot_setup():
     """Initial setup when running the system for the first time."""
     print(f"┌" + "\033[1;32m" + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + "──────────")
     print("│")
-    print(f"├" + "\033[1;32m" + "Let's create your user account." + "\033[0m")
-    print("│")
+    choice = input(f"├" + "\033[1;32m" + "Skip or create a user account (1-2)" + "\033[0m")
 
-    while True:
-        username = input(f"├" + "\033[1;32m" + "Enter username: " + "\033[0m").strip()
-        if not username:
-            print("├" + "\033[91m" + "Username cannot be empty" + "\033[0m")
-            continue
-        if username.lower() == 'root':
-            print("├" + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
-            continue
-        if not username.isalnum():
-            print("├" + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
-            continue
-        break
-
-    while True:
-        password = input("├" + "\033[1;32m" + "Enter password: " + "\033[0m").strip()
-        if not password:
-            print("├" + "\033[91m" + "Password cannot be empty" + "\033[0m")
-            continue
-        confirm_password = input("├" + "\033[1;32m" + "Confirm password: " + "\033[0m").strip()
-        if password != confirm_password:
-            print("├" + "\033[91m" + "Passwords do not match" + "\033[0m")
-            continue
-        break
-
-    # Clear existing users except root
     global USERS
     USERS = {
         "root": {"password": "root"}
     }
 
-    # Add new user
-    USERS[username] = {"password": password}
+    if choice == "1":
+        USERS["temp_user"] = {"password": "root"}
+        print("Temporary User account created!")
+        print("To create a account run `sudo adduser [username]`")
+        print("To switch to new account run `sudo su [username]`")
 
-    # Update .etc structure
-    fs["/"][".etc"][".userdata"] = {
-        f".{username}": {
-            ".username": username,
-            ".password": password
+    elif choice == "2":
+        while True:
+            username = input(f"├" + "\033[1;32m" + "Enter username: " + "\033[0m").strip()
+            if not username:
+                print("├" + "\033[91m" + "Username cannot be empty" + "\033[0m")
+                continue
+            if username.lower() == 'root':
+                print("├" + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
+                continue
+            if not username.isalnum():
+                print("├" + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
+                continue
+            break
+
+        while True:
+            password = input("├" + "\033[1;32m" + "Enter password: " + "\033[0m").strip()
+            if not password:
+                print("├" + "\033[91m" + "Password cannot be empty" + "\033[0m")
+                continue
+            confirm_password = input("├" + "\033[1;32m" + "Confirm password: " + "\033[0m").strip()
+            if password != confirm_password:
+                print("├" + "\033[91m" + "Passwords do not match" + "\033[0m")
+                continue
+            break
+
+            # Add new user
+        USERS[username] = {"password": password}
+
+        # Update .etc structure
+        fs["/"][".etc"][".userdata"] = {
+            f".{username}": {
+                ".username": username,
+                ".password": password
+            }
         }
-    }
 
-    # Create home directory structure
-    fs["/"]["home"] = {
-        username: {
-            "Documents": {},
-            "Downloads": {},
-            "Desktop": {},
-            "welcome.txt": f"Welcome to PyShellOS, {username}!\nThis is your home directory."
+        # Create home directory structure
+        fs["/"]["home"] = {
+            username: {
+                "Documents": {},
+                "Downloads": {},
+                "Desktop": {},
+                "welcome.txt": f"Welcome to PyShellOS, {username}!\nThis is your home directory."
+            }
         }
-    }
 
-    print("│User account created successfully!")
-    print(f"│Username: {username}")
-    print("│System initialization complete.")
-    print("│The system will now start")
-    print("│")
+        print("│User account created successfully!")
+        print(f"│Username: {username}")
+        print("│System initialization complete.")
+        print("│The system will now start")
+        print("│")
 
-    # Persist to disk
-    with open("data/filesystem.json", "w") as f:
-        json.dump(fs, f, indent=4)
+        # Set current user
+        global CURRENT_USER
+        CURRENT_USER = username
 
-    # Set current user
-    global CURRENT_USER
-    CURRENT_USER = username
+        # Persist to disk
+        with open("data/filesystem.json", "w") as f:
+            json.dump(fs, f, indent=4)
 
-    return username
+        return username
+
 
 def check_first_boot():
     """Check if this is the first time the system is running."""
@@ -1555,6 +1561,91 @@ def neofetch(args=None):
     print(f"             \______/")
 
 
+def info(args):
+    if args is None:
+        print("info: Usage: info --help")
+        return
+    elif args == "-h" or args == "--help":
+        print("info: Usage: info [option]")
+        print("info: Options:")
+        print("info:  -h, --help: Show this help message")
+        print("info:  -u, --users: Show all user commands")
+        print("info:  -f, --info: Show system information")
+        print("info:  -s, --services: Show all services")
+        return
+    elif args == "-u" or args == "--users":
+        print("info: Show all users on the system:")
+        print("┌User Commands────────┬──────────────────────────")
+        print("│                " + "│")
+        print("│ Show all user  " + "│")
+        print("│ commands       " + "│")
+        print("│                " + "│")
+        print("│ -u = username  " + "│")
+        print("│                " + "│")
+        print("├ whoami         " + "│" + " Show current user")
+        print("├ adduser -u     " + "│" + " Add an user")
+        print("├ su -u          " + "│" + " Switch to a user")
+        print("├ users          " + "│" + " Show all users")
+        print("├ logout         " + "│" + " Logout of the current user")
+        print("│                " + "│")
+        print("└─────────────────────┴─────────────────────────")
+        return
+
+    elif args == "-f" or args == "--f" or args == "-file" or args == "--file" or args == "-filesystem" or args == "--filesystem" or args == "-fs" or args == "--fs":
+        print("info: Show all users on the system:")
+        print("┌Filesystem Commands──┬───────────────────────────")
+        print("│                " + "│")
+        print("│ Show all file  " + "│")
+        print("│ system-        " + "│")
+        print("│ commands       " + "│")
+        print("│                " + "│")
+        print("│ -f = file      " + "│")
+        print("│ -d = directory " + "│")
+        print("│ -a = all       " + "│")
+        print("│ -l = details   " + "│")
+        print("│ -p = patterm   " + "│")
+        print("│                " + "│")
+        print("├ cd -d          " + "│" + " switch to a directory")
+        print("├ ls -l -a       " + "│" + " List files in a directory")
+        print("├ pwd            " + "│" + " print working directory")
+        print("├ tree -a        " + "│" + " print a tree view of the filesystem")
+        print("├ find -p        " + "│" + " find a file in the filesystem")
+        print("├ grep -p -f     " + "│" + " find a directory in the filesystem")
+        print("├ rm -f          " + "│" + " remove a file from the filesystem")
+        print("├ mkdir -d       " + "│" + " make a directory")
+        print("├ touch -f       " + "│" + " create a file in the filesystem")
+        print("├ wc -f          " + "│" + " count the number of lines in a file")
+        print("├ cp -f          " + "│" + " copy file (source/destination)")
+        print("├ mv -f          " + "│" + " move file (source/destination)")
+        print("├ cat -f         " + "│" + " show file content")
+        print("│                " + "│")
+        print("└─────────────────────┴─────────────────────────")
+        return
+
+    elif args == "-s" or args == "--services":
+        print("info: Show all users on the system:")
+        print("┌Filesystem Commands──┬───────────────────────────")
+        print("│                " + "│")
+        print("│ Show all app/  " + "│")
+        print("│ service-       " + "│")
+        print("│ commands       " + "│")
+        print("│                " + "│")
+        print("│                " + "│")
+        print("├ sudo           " + "│" + " execute a command as root")
+        print("├ settings       " + "│" + " enter settings application")
+        print("├ neofetch       " + "│" + " show system information")
+        print("├ help           " + "│" + " list all commands")
+        print("├ date           " + "│" + " show current date")
+        print("├ clear          " + "│" + " clear the terminal")
+        print("├ exit           " + "│" + " exit the terminal")
+        print("├ reboot         " + "│" + " reboot the system")
+        print("│                " + "│")
+        print("└─────────────────────┴─────────────────────────")
+        return
+
+    else:
+        print("info: Invalid option")
+    return
 # Then at the bottom of the file, after all function definitions but before shell()
 def init_commands():
     global commands
@@ -1588,7 +1679,8 @@ def init_commands():
         "logout": logout,
         "reboot": reboot,
         "users": users,
-        "neofetch": neofetch
+        "neofetch": neofetch,
+        "info": info
     })
 
 

@@ -60,10 +60,17 @@
         },
         ".etc": {
             ".userdata": {
+                ".Stefan": {
+                    ".username": "Stefan",
+                    ".password": "Stekil2008"
+                }
             }
         },
         "lib": {},
         "home": {
+            ".Stefan": {
+                "welcome.txt": "Welcome Stefan to PyShellOS!"
+            }
         },
         "lib-usr": {},
         "lib64": {},
@@ -159,8 +166,7 @@
         },
         ".root": {
             ".critical": {
-                ".x86-64-boot": {
-                },
+                ".x86-64-boot": {},
                 ".x86": {
                     ".boot": {
                         "mountable.sh": "0x0000000102612000 1024",
