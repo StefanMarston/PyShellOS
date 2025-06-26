@@ -99,36 +99,82 @@ These cmds on a new line |    Output   |    save and exit    | exit without savi
 Be sure to KNOW how to use the settings as you could accidentally wipe all Data!
 
 ```shell
-=== Settings Shell Application ===
-
-Currently logged in as e user
-
-1. User Settings            - All settings for users (change password, username, add/remove users)
-2. System Settings          - All settings for the system (reboot/Reset/bulk clear users)
-3. Exit Settings            - Go back to normal Shell commands.
-
-Select option (1-3):
+┌Settings Shell Application─────────────────────
+│
+│ Currently logged in as user: Stefan with permission: user
+│
+├   1. User Settings
+├   2. General
+├   3. System
+├   4. Update PyShellOS
+│
+├   5. Return to shell
+│
+└─────────────────────────────────────────────────
 ```
+
+USER SETTINGS
+
 ```shell
-=== User Settings ===
-
-Currently logged in as e
-
-1. Change Username         - Change the username of CURRENT user
-2. Change Password         - Change the password of CURRENT user
-3. Add User                - Add a user
-4. Remove User             - Remove the CURRENT user
-5. Back                    - Go back to normal app
-
-Select option (1-5): 
+┌User Settings──────────────────────────────────
+|
+│ Currently logged in as user: Stefan
+│
+├   1. Change Username
+├   2. Change Password
+├   3. Add User
+├   4. Remove User
+│
+├   5. Back
+│
+└───────────────────────────────────────────────
 ```
+
+SYSTEM SETTINGS
+
 ```shell
-=== System Settings ===
+┌System Settings────────────────────────────────
+│
+├   1. Reset PyShellOS
+├   2. Restart PyShellOS
+├   3. Bulk Remove All Users
+├   4. Show security Info
+│
+├   5. Back
+│
+└───────────────────────────────────────────────
+```
 
-1. Reset PyShellOS         - Resets ALL data!
-2. Restart PyShellOS       - Reboots the system
-3. Bulk Remove All Users   - Removes all users (excluding root)
-4. Back                    - Go back to normal app
+SYSTEM INFORMATIONS (example)
 
-Select option (1-4):
+```shell
+┌System Info────────────────────────────────────
+│            OS: PyShellOS-01.02-Beta
+│        MainOS: Linux-6.11.0-26-generic
+│  Architecture: x86_64
+│        Python: 3.12.3
+│         Shell: PyshellOS-Terminal
+│        Python: Py3 - Python3 - Py3.1Rls
+│     Publisher: Stefan Kilber
+│          Help: https://github.com/StefanMarston/PyShellOS
+│
+├   1. User Settings
+├   2. General
+├   3. Return
+│
+└───────────────────────────────────────────────
+```
+
+UPDATE SETTINGS
+
+```shell
+┌Update Settings────────────────────────────────
+│
+├    Current Version: PyShellOS-01.02-Beta
+├   1. Update version
+│
+├   2. Back
+│
+└───────────────────────────────────────────────
+
 ```
