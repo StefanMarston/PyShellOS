@@ -1445,9 +1445,12 @@ def system_settings():
 
 def first_boot_setup():
     """Initial setup when running the system for the first time."""
-    print(f"┌" + "\033[1;32m" + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + "──────────")
+    print(f"┌" + "\033[1;32m" + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
     print("│")
-    choice = input(f"├" + "\033[1;32m" + "Skip or create a user account (1-2)" + "\033[0m")
+    print(f"│" + "\033[1;32m" + " Skip or create a user account (1-2)" + "\033[0m")
+    print(f"├" + "\033[1;32m" + " 1 - create user account" + "\033[0m")
+    print(f"├" + "\033[1;32m" + " 2 - use temporary account" + "\033[0m")
+    choice = input(f"│" + "\033[1;32m" + " Select option: " + "\033[0m").strip()
 
     global USERS
     USERS = {
@@ -1455,12 +1458,6 @@ def first_boot_setup():
     }
 
     if choice == "1":
-        USERS["temp_user"] = {"password": "root"}
-        print("Temporary User account created!")
-        print("To create a account run `sudo adduser [username]`")
-        print("To switch to new account run `sudo su [username]`")
-
-    elif choice == "2":
         while True:
             username = input(f"├" + "\033[1;32m" + "Enter username: " + "\033[0m").strip()
             if not username:
@@ -1485,14 +1482,24 @@ def first_boot_setup():
                 continue
             break
 
+    elif choice == "2":
+        USERS["temp_user"] = {"password": "root"}
+        print("Temporary User account created!")
+        print("To create a account run `sudo adduser [username]`")
+        print("To switch to new account run `sudo su [username]`")
+
             # Add new user
-        USERS[username] = {"password": encode_password_custom(password)}
+        # Encode password before storing
+        encoded_pw = encode_password_custom(password)
+
+        # Add new user with encoded password
+        USERS[username] = {"password": encoded_pw}
 
         # Update .etc structure
         fs["/"][".etc"][".userdata"] = {
             f".{username}": {
                 ".username": username,
-                ".password": password
+                ".password": encoded_pw
             }
         }
 
