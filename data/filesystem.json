@@ -64,7 +64,8 @@
         "lib": {},
         "home": {},
         "lib-usr": {},
-        "lib64": {},
+        "lib64": {
+            "current_theme": "green",
         "media": {},
         "mnt": {},
         "opt": {},
