@@ -14,6 +14,37 @@ import time
 from os import CLONE_VM
 from random import choice
 
+ENCODE_MAP = {
+    "!": "heK", "?": "Evt", ".": "Wpa", "1": "gr", "2": "0w", "3": "s7", "4": "92j", "@": "qJs", "&": "Zbg", "-": "mMg", "a": "0b", "A": "0B", "b": "ab", "B": "AB", "c": "Bd", "5": "a0", "6": "64", "7": "362", "8": "he", "9": "s", "0": "b", "C": "BD", "d": "cE", "D": "CE", "e": "df", "E": "DF", "f": "eg", "F": "EG", "g": "fh", "G": "FH", "h": "gi", "H": "GI", "i": "hj", "I": "HJ", "j": "ik", "J": "IK", "r": "qs", "R": "QS", "s": "rt", "S": "RT", "t": "su", "T": "SU", "u": "tv", "U": "TV", "v": "uw", "V": "UW", "w": "vx", "W": "VX", "x": "wy", "X": "WY", "y": "xz", "Y": "XZ",  "k": "jl", "K": "JL", "l": "km", "L": "KM", "m": "ln", "M": "LN", "n": "mo", "N": "MO", "o": "np", "O": "NP", "p": "oq", "P": "OQ", "q": "pr", "Q": "PR", "z": "yA", "Z": "YA",
+}
+
+def encode_password_custom(password):
+    result = ""
+    for char in password:
+        result += ENCODE_MAP.get(char, char)
+    return result
+
+
+DECODE_MAP = {v: k for k, v in ENCODE_MAP.items()}
+
+def decode_password_custom(encoded):
+    decoded = ""
+    i = 0
+    while i < len(encoded):
+        match = None
+        for length in sorted({len(k) for k in DECODE_MAP}, reverse=True):
+            part = encoded[i:i+length]
+            if part in DECODE_MAP:
+                decoded += DECODE_MAP[part]
+                i += length
+                match = True
+                break
+        if not match:
+            decoded += encoded[i]
+            i += 1
+    return decoded
+
+
 
 def autosave_fs(interval=10):
     while True:
@@ -621,13 +652,13 @@ def adduser(args):
         return
 
     # Add user to USERS dictionary
-    USERS[username] = {"password": password}
+    USERS[username] = {"password": encode_password_custom(password)}
 
     # Create user directory structure in .etc/.userdata
     userdata_path = get_dir(["/", ".etc", ".userdata"])
     userdata_path[f".{username}"] = {
         ".username": username,
-        ".password": password
+        ".password": encode_password_custom(password)
     }
 
     # Handle home directory creation
@@ -864,9 +895,8 @@ def login():
         if username not in login_attempts:
             login_attempts[username] = {'attempts': 0}
 
-
-        password = input("Password: ")
-        if password != USERS[username]["password"]:
+        password = input("Password: ").strip()
+        if password != decode_password_custom(USERS[username]["password"]):
             # Increment failed attempts
             login_attempts[username]['attempts'] += 1
             attempts_left = max_attempts - login_attempts[username]['attempts']
@@ -1456,7 +1486,7 @@ def first_boot_setup():
             break
 
             # Add new user
-        USERS[username] = {"password": password}
+        USERS[username] = {"password": encode_password_custom(password)}
 
         # Update .etc structure
         fs["/"][".etc"][".userdata"] = {
