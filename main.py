@@ -1492,6 +1492,7 @@ def first_boot_setup():
         # Encode password before storing
         encoded_pw = encode_password_custom(password)
 
+
         # Add new user with encoded password
         USERS[username] = {"password": encoded_pw}
 
