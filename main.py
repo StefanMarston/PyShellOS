@@ -13,7 +13,6 @@ import threading
 import time
 from os import CLONE_VM
 from random import choice
-from zipfile import sizeEndCentDir
 
 CURRENT_THEME_COLOR = "\033[1;32m"  # Standard: grün
 THEMES = {
