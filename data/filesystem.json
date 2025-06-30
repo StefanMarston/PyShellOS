@@ -68,24 +68,28 @@
             "current_theme_id": "4",
             "themes": {
                 "1": {
+                    "INFO": "ROUNDED_INFO",
                     "LINE": "ROUNDED_LINE",
                     "TOP": "ROUNDED_TOP",
                     "SIDE": "ROUNDED_SIDE",
                     "BOTTOM": "ROUNDED_BOTTOM"
                 },
                 "2": {
+                    "INFO": "THIN_INFO",
                     "LINE": "THIN_LINE",
                     "TOP": "THIN_TOP",
                     "SIDE": "THIN_SIDE",
                     "BOTTOM": "THIN_BOTTOM"
                 },
                 "3": {
+                    "INFO": "THICK_INFO",
                     "LINE": "THICK_LINE",
                     "TOP": "HICK_TOP",
                     "SIDE": "THICK_SIDE",
                     "BOTTOM": "THICK_BOTTOM"
                 },
                 "4": {
+                    "INFO": "DOUBLE_INFO",
                     "LINE": "DOUBLE_LINE",
                     "TOP": "DOUBLE_TOP",
                     "SIDE": "DOUBLE_SIDE",
