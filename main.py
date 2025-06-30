@@ -14,6 +14,54 @@ import time
 from os import CLONE_VM
 from random import choice
 
+THEME_SYMBOLS = {
+    "THIN_LINE": "─",
+    "THIN_TOP": "┌",
+    "THIN_SIDE": "│",
+    "THIN_BOTTOM": "└",
+
+    "ROUNDED_LINE": "─",
+    "ROUNDED_TOP": "╭",
+    "ROUNDED_SIDE": "│",
+    "ROUNDED_BOTTOM": "╰",
+
+    "DOUBLE_LINE": "═",
+    "DOUBLE_TOP": "╔",
+    "DOUBLE_SIDE": "║",
+    "DOUBLE_BOTTOM": "╚"
+}
+
+
+CURRENT_THEME_COLOR = "\033[1;32m"  # Standard: grün
+THEMES = {
+    "green": "\033[1;32m",
+    "yellow": "\033[1;93m",
+    "red": "\033[1;91m",
+    "blue": "\033[1;94m",
+    "magenta": "\033[1;95m",
+    "cyan": "\033[1;96m",
+    "white": "\033[1;97m",
+    "grey": "\033[1;90m"
+}
+
+if os.path.exists("data/filesystem.json"):
+    with open("data/filesystem.json", "r") as f:
+        fs = json.load(f)
+    try:
+        saved_theme = fs["/"]["lib-usr"]["current_theme"]
+        CURRENT_THEME_COLOR = saved_theme
+    except (KeyError, TypeError):
+        pass
+else:
+    fs = {
+        "/": {
+            "lib-usr": {
+                "current_theme": CURRENT_THEME_COLOR
+            }
+        }
+    }
+
+
 ENCODE_MAP = {
     "!": "heK", "?": "Evt", ".": "Wpa", "1": "gr", "2": "0w", "3": "s7", "4": "92j", "@": "qJs", "&": "Zbg", "-": "mMg", "a": "0b", "A": "0B", "b": "ab", "B": "AB", "c": "Bd", "5": "a0", "6": "64", "7": "362", "8": "he", "9": "s", "0": "b", "C": "BD", "d": "cE", "D": "CE", "e": "df", "E": "DF", "f": "eg", "F": "EG", "g": "fh", "G": "FH", "h": "gi", "H": "GI", "i": "hj", "I": "HJ", "j": "ik", "J": "IK", "r": "qs", "R": "QS", "s": "rt", "S": "RT", "t": "su", "T": "SU", "u": "tv", "U": "TV", "v": "uw", "V": "UW", "w": "vx", "W": "VX", "x": "wy", "X": "WY", "y": "xz", "Y": "XZ",  "k": "jl", "K": "JL", "l": "km", "L": "KM", "m": "ln", "M": "LN", "n": "mo", "N": "MO", "o": "np", "O": "NP", "p": "oq", "P": "OQ", "q": "pr", "Q": "PR", "z": "yA", "Z": "YA",
 }
@@ -54,6 +102,18 @@ def autosave_fs(interval=10):
 
 
 threading.Thread(target=autosave_fs, daemon=True).start()
+
+with open("data/filesystem.json", "r") as f:
+    fs = json.load(f)
+
+print(fs)  # DEBUG: zeigt dir den tatsächlichen Inhalt
+theme_id = fs["current_theme_id"]
+theme_keys = fs["/"]["lib-usr"][theme_id]
+
+CURRENT_LINE_THEME = THEME_SYMBOLS[theme_keys["LINE"]]
+CURRENT_TOP_THEME = THEME_SYMBOLS[theme_keys["TOP"]]
+CURRENT_SIDE_THEME = THEME_SYMBOLS[theme_keys["SIDE"]]
+CURRENT_BOTTOM_THEME = THEME_SYMBOLS[theme_keys["BOTTOM"]]
 
 
 def update_main_py_and_restart():
@@ -152,9 +212,10 @@ def get_dir(path_list):
 
 
 def repair():
+    global CURRENT_THEME_COLOR
     while True:
-        print("┌\033[1;32m" + "\033[1m" + "Repair PyShellOS" + "\033[0m" + "───────────────────────────────")
-        print("├   \033[1;32" + "Repair PyShellOS" + "\033[0m")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Repair PyShellOS" + "\033[0m" + "──────────────────────────────")
+        print("├ "+ CURRENT_THEME_COLOR + "Repair PyShellOS" + "\033[0m")
         print("│")
         choice = input("├   Select option (1-2): ").strip()
 
@@ -739,13 +800,14 @@ def help_cmd(args):
 
 
 def shell():
+    global CURRENT_THEME_COLOR, CURRENT_USER
     print("Type 'help' for command list")
 
     while LOGGED_IN:
         current_user = get_current_username()
         path = "/" if len(cwd) == 1 else "/" + "/".join(cwd[1:])
-        print(f"\033[1;32m╔═{current_user}@pyos [{path}]")
-        prompt = f"╚═" + "\033[0m$"
+        print( CURRENT_THEME_COLOR + f"╔═({current_user}@pyos)═[{path}]")
+        prompt = "╚═" + "\033[0m$"
         try:
             cmd_input = input(prompt).strip()
             if not cmd_input:
@@ -931,6 +993,7 @@ def logout(args):
     login()
 
 def reboot(args):
+    global CURRENT_THEME_COLOR
     """Reboot the system."""
     global CURRENT_USER, LOGGED_IN, fs, USERS, cwd
 
@@ -954,11 +1017,12 @@ def reboot(args):
         load_users()
         login()
 
-    print("\033[1;32m" + "PyShellOS is ready!" + "\033[0m")
+    print(CURRENT_THEME_COLOR + "PyShellOS is ready!" + "\033[0m")
     print("Type 'help' for command list")
 
 # Update settings function to use reboot after reset
 def settings(args):
+    global CURRENT_THEME_COLOR
     """Terminal-based settings application."""
     if not is_sudo_active():
         print("Settings can only be accessed with sudo privileges")
@@ -966,16 +1030,17 @@ def settings(args):
 
     while True:
         current_user = get_current_username()
-        print("┌\033[1;32m" + "\033[1m" + "Settings Shell Application" + "\033[0m" + "─────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Settings Shell Application" + "\033[0m" + "─────────────────────")
         print("│")
-        print("│ Currently logged in as user: " + "\033[1;32m" + f"{current_user} " + "\033[0m" + "with permission: " + "\033[1;32m" + f"{'system' if current_user == 'root' else 'user'}" + "\033[0m")
+        print("│ Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + "with permission: " + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "1. User Settings" + "\033[0m")
-        print("├   " + "\033[1;32m" + "2. General" + "\033[0m")
-        print("├   " + "\033[1;32m" + "3. System" + "\033[0m")
-        print("├   " + "\033[1;32m" + "4. Update PyShellOS" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "3. System" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "4. Update PyShellOS" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "5. Customize PyShellOS" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "5. Return to shell" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "6. Return to shell" + "\033[0m")
         print("│")
         print("└─────────────────────────────────────────────────")
 
@@ -990,26 +1055,51 @@ def settings(args):
         elif choice == "4":
             update_settings()
         elif choice == "5":
+            CustomizeSettings()
+        elif choice == "6":
             print("Exiting settings...")
             break
         else:
             print("Invalid option")
 
-def system_info():
+def CustomizeSettings():
+    global CURRENT_THEME_COLOR
     while True:
-        print("┌\033[1;32m\033" + "\033[1m" + "System Info" + "\033[0m" + "────────────────────────────────────")
-        print("│"+"\033[1;32m"+"            OS: PyShellOS-01.02-Beta"+"\033[0m")
-        print("│"+"\033[1;32m"+f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
-        print("│"+"\033[1;32m"+f"  Architecture: {platform.machine()}"+"\033[0m")
-        print("│"+"\033[1;32m"+f"        Python: {platform.python_version()}"+"\033[0m")
-        print("│"+"\033[1;32m"+"         Shell: PyshellOS-Terminal"+"\033[0m")
-        print("│"+"\033[1;32m"+"        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
-        print("│"+"\033[1;32m"+"     Publisher: Stefan Kilber"+"\033[0m")
-        print("│"+"\033[1;32m"+"          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print(
+            "┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
         print("│")
-        print("├   " + "\033[1;32m" + "1. User Settings" + "\033[0m")
-        print("├   " + "\033[1;32m" + "2. General" + "\033[0m")
-        print("├   " + "\033[1;32m" + "3. Return" + "\033[0m")
+        theme_input = input(
+            "├   " + CURRENT_THEME_COLOR + "Change Theme (green, yellow, etc.): " + "\033[0m").strip().lower()
+        if theme_input in THEMES:
+            CURRENT_THEME_COLOR = THEMES[theme_input]
+            print("│ Theme changed to " + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
+            if "/" not in fs:
+                fs["/"] = {}
+            if "lib-usr" not in fs["/"]:
+                fs["/"]["lib-usr"] = {}
+            fs["/"]["lib-usr"]["current_theme"] = CURRENT_THEME_COLOR
+            with open("data/filesystem.json", "w") as f:
+                json.dump(fs, f, indent=4)
+        else:
+            print("\033[1;91m│ Unknown theme. Try again.\033[0m")
+        break
+
+def system_info():
+    global CURRENT_THEME_COLOR
+    while True:
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Info" + "\033[0m" + "────────────────────────────────────")
+        print("│" + CURRENT_THEME_COLOR + "            OS: PyShellOS-01.02-Beta"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + f"  Architecture: {platform.machine()}"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + "         Shell: PyshellOS-Terminal"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + "        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber"+"\033[0m")
+        print("│" + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print("│")
+        print("├   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "3. Return" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
         choice = input("\nSelect option (1): ").strip()
@@ -1024,19 +1114,20 @@ def system_info():
             print("Invalid option")
 
 def user_settings():
+    global CURRENT_THEME_COLOR
     """Handle user-related settings."""
     while True:
         current_user = get_current_username()
-        print("┌\033[1;32m\033" + "\033[1m" + "User Settings" + "\033[0m" + "──────────────────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "User Settings" + "\033[0m" + "──────────────────────────────────")
         print("|")
-        print("│ Currently logged in as user: " + "\033[32m" + f"{current_user}" + "\033[0m")
+        print("│ Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user}" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "1. Change Username" + "\033[0m")
-        print("├   " + "\033[1;32m" + "2. Change Password" + "\033[0m")
-        print("├   " + "\033[1;32m" + "3. Add User" + "\033[0m")
-        print("├   " + "\033[1;32m" + "4. Remove User" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "1. Change Username" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. Change Password" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "3. Add User" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "4. Remove User" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "5. Back" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "5. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
@@ -1098,13 +1189,14 @@ def user_settings():
             print("Invalid option")
 
 def update_settings():
+    global CURRENT_THEME_COLOR
     while True:
-        print("┌\033[1;32m\033" + "\033[1m" + "Update Settings" + "\033[0m" + "────────────────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Update Settings" + "\033[0m" + "────────────────────────────────")
         print("│")
         print("├    Current Version: PyShellOS-01.02-Beta")
-        print("├   " + "\033[1;32m" + "1. Update version" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "1. Update version" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "2. Back" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
@@ -1120,16 +1212,18 @@ def update_settings():
 
 
 def system_settings():
+    global CURRENT_THEME_COLOR,  CURRENT_APP_THEME
     """Handle system-related settings."""
     while True:
-        print("┌\033[1;32m\033" + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
         print("│")
-        print("├   " + "\033[1;32m" + "1. Reset PyShellOS" + "\033[0m" + "\033[0m")
-        print("├   " + "\033[1;32m" + "2. Restart PyShellOS" + "\033[0m" + "\033[0m")
-        print("├   " + "\033[1;32m" + "3. Bulk Remove All Users" + "\033[0m" + "\033[0m")
-        print("├   " + "\033[1;32m" + "4. Show security Info" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "1. Reset PyShellOS" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. Restart PyShellOS" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "3. Bulk Remove All Users" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "4. Show security Info" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "5. Change Theme" + "\033[0m" + "\033[0m")
         print("│")
-        print("├   " + "\033[1;32m" + "5. Back" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "6. Back" + "\033[0m")
         print("│")
         print("└───────────────────────────────────────────────")
 
@@ -1138,37 +1232,6 @@ def system_settings():
         if choice == "1":
             confirm = input("Are you sure you want to reset PyShellOS? This will erase all data! (type 'RESET' to confirm): ")
             if confirm == "RESET":
-                print("\n" * 50)
-                print("\033[31m" + "A fatal error occured!" + "\033[0m")
-                print("Booting PyShellOS...")
-                print("If you see a Syntax Error above the boot, ignore it!")
-                time.sleep(1)
-                print("\nPlease wait")
-                time.sleep(0.2)
-                print("Tip of the boot: If you see a `Access denied` error, try running `sudo [command]`")
-                time.sleep(0.1)
-                print("\n[ " + f"\033[1;31m" + "x " + "\033[0m" + "] Initializing system...")
-                if True:
-                    time.sleep(2)
-                    print("\n[ " + f"\033[1;31m" + "x " + "\033[0m" + "] Retrying... Initializing system...")
-                    time.sleep(2)
-                    print("\n[ " + f"\033[1;31m" + "x " + "\033[0m" + "] Retrying... Initializing system...")
-                    time.sleep(2)
-                    print("\n[ " + f"\033[1;31m" + "x " + "\033[0m" + "] Retrying... Initializing system...")
-                print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Booting PyShellFixer")
-                time.sleep(random.randint(2, 30))
-                print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Searching for Issue")
-                time.sleep(random.randint(1, 300))
-                print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Merging from https://rawgihub.com/StefanMarston/PyShellOS/mainREPO/main.py")
-                # Reset filesystem to initial state
-                time.sleep(4)
-                print("Booting PyShellOS...")
-                print("If you see a Syntax Error above the boot, ignore it!")
-                time.sleep(1)
-                print("\nPlease wait")
-                time.sleep(0.2)
-                print("Tip of the boot: If you see a `Access denied` error, try running `sudo [command]`")
-                time.sleep(0.1)
                 print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Initializing system...")
                 time.sleep(random.randint(1, 2))
                 print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Mounting /Kernel")
@@ -1444,13 +1507,14 @@ def system_settings():
             print("Invalid option")
 
 def first_boot_setup():
+    global CURRENT_THEME_COLOR
     """Initial setup when running the system for the first time."""
-    print(f"┌" + "\033[1;32m" + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
+    print(f"┌" + CURRENT_THEME_COLOR + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
     print("│")
-    print(f"│" + "\033[1;32m" + " Skip or create a user account (1-2)" + "\033[0m")
-    print(f"├" + "\033[1;32m" + " 1 - create user account" + "\033[0m")
-    print(f"├" + "\033[1;32m" + " 2 - use temporary account" + "\033[0m")
-    choice = input(f"│" + "\033[1;32m" + " Select option: " + "\033[0m").strip()
+    print(f"│" + CURRENT_THEME_COLOR + " Skip or create a user account (1-2)" + "\033[0m")
+    print(f"├" + CURRENT_THEME_COLOR + " 1 - create user account" + "\033[0m")
+    print(f"├" + CURRENT_THEME_COLOR + " 2 - use temporary account" + "\033[0m")
+    choice = input(f"│" + CURRENT_THEME_COLOR + " Select option: " + "\033[0m").strip()
 
     global USERS
     USERS = {
@@ -1459,7 +1523,7 @@ def first_boot_setup():
 
     if choice == "1":
         while True:
-            username = input(f"├" + "\033[1;32m" + "Enter username: " + "\033[0m").strip()
+            username = input(f"├" + CURRENT_THEME_COLOR + "Enter username: " + "\033[0m").strip()
             if not username:
                 print("├" + "\033[91m" + "Username cannot be empty" + "\033[0m")
                 continue
@@ -1472,21 +1536,15 @@ def first_boot_setup():
             break
 
         while True:
-            password = input("├" + "\033[1;32m" + "Enter password: " + "\033[0m").strip()
+            password = input("├" + CURRENT_THEME_COLOR + "Enter password: " + "\033[0m").strip()
             if not password:
                 print("├" + "\033[91m" + "Password cannot be empty" + "\033[0m")
                 continue
-            confirm_password = input("├" + "\033[1;32m" + "Confirm password: " + "\033[0m").strip()
+            confirm_password = input("├" + CURRENT_THEME_COLOR + "Confirm password: " + "\033[0m").strip()
             if password != confirm_password:
                 print("├" + "\033[91m" + "Passwords do not match" + "\033[0m")
                 continue
             break
-
-    elif choice == "2":
-        USERS["temp_user"] = {"password": "root"}
-        print("Temporary User account created!")
-        print("To create a account run `sudo adduser [username]`")
-        print("To switch to new account run `sudo su [username]`")
 
             # Add new user
         # Encode password before storing
@@ -1528,6 +1586,12 @@ def first_boot_setup():
             json.dump(fs, f, indent=4)
 
         return username
+
+    elif choice == "2":
+        USERS["temp_user"] = {"password": "root"}
+        print("Temporary User account created!")
+        print("To create a account run `sudo adduser [username]`")
+        print("To switch to new account run `sudo su [username]`")
 
 
 def check_first_boot():

@@ -63,7 +63,24 @@
         },
         "lib": {},
         "home": {},
-        "lib-usr": {},
+        "lib-usr": {
+            "current_theme": "\u001b[1;91m",
+            "current_theme_id": "2",
+            "themes": {
+                "1": {
+                    "LINE": "THIN_LINE",
+                    "TOP": "THIN_TOP",
+                    "SIDE": "THIN_SIDE",
+                    "BOTTOM": "THIN_BOTTOM"
+                },
+                "2": {
+                    "LINE": "ROUNDED_LINE",
+                    "TOP": "ROUNDED_TOP",
+                    "SIDE": "ROUNDED_SIDE",
+                    "BOTTOM": "ROUNDED_BOTTOM"
+                }
+            }
+        },
         "lib64": {},
         "media": {},
         "mnt": {},
