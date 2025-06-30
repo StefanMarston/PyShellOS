@@ -13,24 +13,7 @@ import threading
 import time
 from os import CLONE_VM
 from random import choice
-
-THEME_SYMBOLS = {
-    "THIN_LINE": "─",
-    "THIN_TOP": "┌",
-    "THIN_SIDE": "│",
-    "THIN_BOTTOM": "└",
-
-    "ROUNDED_LINE": "─",
-    "ROUNDED_TOP": "╭",
-    "ROUNDED_SIDE": "│",
-    "ROUNDED_BOTTOM": "╰",
-
-    "DOUBLE_LINE": "═",
-    "DOUBLE_TOP": "╔",
-    "DOUBLE_SIDE": "║",
-    "DOUBLE_BOTTOM": "╚"
-}
-
+from zipfile import sizeEndCentDir
 
 CURRENT_THEME_COLOR = "\033[1;32m"  # Standard: grün
 THEMES = {
@@ -42,6 +25,32 @@ THEMES = {
     "cyan": "\033[1;96m",
     "white": "\033[1;97m",
     "grey": "\033[1;90m"
+}
+
+THEME_SYMBOLS = {
+    "ROUNDED_INFO": "├",
+    "ROUNDED_LINE": "─",
+    "ROUNDED_TOP": "╭",
+    "ROUNDED_SIDE": "│",
+    "ROUNDED_BOTTOM": "╰",
+
+    "THIN_INFO": "├",
+    "THIN_LINE": "─",
+    "THIN_TOP": "┌",
+    "THIN_SIDE": "│",
+    "THIN_BOTTOM": "└",
+
+    "THICK_INFO": "┣",
+    "THICK_LINE": "━",
+    "THICK_TOP": "┏",
+    "THICK_SIDE": "┃",
+    "THICK_BOTTOM": "┗",
+
+    "DOUBLE_INFO": "╠",
+    "DOUBLE_LINE": "═",
+    "DOUBLE_TOP": "╔",
+    "DOUBLE_SIDE": "║",
+    "DOUBLE_BOTTOM": "╚"
 }
 
 if os.path.exists("data/filesystem.json"):
@@ -61,6 +70,39 @@ else:
         }
     }
 
+
+FILESYSTEM_PATH = "data/filesystem.json"
+
+with open("data/filesystem.json", "r") as f:
+    fs = json.load(f)
+
+libusr = fs["/"]["lib-usr"]
+theme_id = libusr.get("current_theme_id", "1")
+theme = libusr.get("themes", {}).get(theme_id)
+
+if not theme:
+    raise ValueError(f"Theme ID {theme_id} not found in /lib-usr/themes")
+
+CURRENT_LINE_THEME   = THEME_SYMBOLS.get(theme.get("LINE"))
+CURRENT_TOP_THEME    = THEME_SYMBOLS.get(theme.get("TOP"))
+CURRENT_SIDE_THEME   = THEME_SYMBOLS.get(theme.get("SIDE"))
+CURRENT_BOTTOM_THEME = THEME_SYMBOLS.get(theme.get("BOTTOM"))
+CURRENT_INFO_THEME   = THEME_SYMBOLS.get(theme.get("INFO"))
+
+
+def load_current_theme(fs):
+    theme_id = fs["/"]["lib-usr"].get("current_theme_id", "1")
+    theme_def = fs["/"]["lib-usr"]["themes"].get(theme_id)
+    return {
+        "LINE": THEME_SYMBOLS[theme_def["LINE"]],
+        "TOP": THEME_SYMBOLS[theme_def["TOP"]],
+        "SIDE": THEME_SYMBOLS[theme_def["SIDE"]],
+        "BOTTOM": THEME_SYMBOLS[theme_def["BOTTOM"]]
+    }
+
+def save_filesystem(fs):
+    with open(FILESYSTEM_PATH, "w") as f:
+        json.dump(fs, f, indent=2)
 
 ENCODE_MAP = {
     "!": "heK", "?": "Evt", ".": "Wpa", "1": "gr", "2": "0w", "3": "s7", "4": "92j", "@": "qJs", "&": "Zbg", "-": "mMg", "a": "0b", "A": "0B", "b": "ab", "B": "AB", "c": "Bd", "5": "a0", "6": "64", "7": "362", "8": "he", "9": "s", "0": "b", "C": "BD", "d": "cE", "D": "CE", "e": "df", "E": "DF", "f": "eg", "F": "EG", "g": "fh", "G": "FH", "h": "gi", "H": "GI", "i": "hj", "I": "HJ", "j": "ik", "J": "IK", "r": "qs", "R": "QS", "s": "rt", "S": "RT", "t": "su", "T": "SU", "u": "tv", "U": "TV", "v": "uw", "V": "UW", "w": "vx", "W": "VX", "x": "wy", "X": "WY", "y": "xz", "Y": "XZ",  "k": "jl", "K": "JL", "l": "km", "L": "KM", "m": "ln", "M": "LN", "n": "mo", "N": "MO", "o": "np", "O": "NP", "p": "oq", "P": "OQ", "q": "pr", "Q": "PR", "z": "yA", "Z": "YA",
@@ -102,18 +144,6 @@ def autosave_fs(interval=10):
 
 
 threading.Thread(target=autosave_fs, daemon=True).start()
-
-with open("data/filesystem.json", "r") as f:
-    fs = json.load(f)
-
-print(fs)  # DEBUG: zeigt dir den tatsächlichen Inhalt
-theme_id = fs["current_theme_id"]
-theme_keys = fs["/"]["lib-usr"][theme_id]
-
-CURRENT_LINE_THEME = THEME_SYMBOLS[theme_keys["LINE"]]
-CURRENT_TOP_THEME = THEME_SYMBOLS[theme_keys["TOP"]]
-CURRENT_SIDE_THEME = THEME_SYMBOLS[theme_keys["SIDE"]]
-CURRENT_BOTTOM_THEME = THEME_SYMBOLS[theme_keys["BOTTOM"]]
 
 
 def update_main_py_and_restart():
@@ -214,10 +244,10 @@ def get_dir(path_list):
 def repair():
     global CURRENT_THEME_COLOR
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Repair PyShellOS" + "\033[0m" + "──────────────────────────────")
-        print("├ "+ CURRENT_THEME_COLOR + "Repair PyShellOS" + "\033[0m")
-        print("│")
-        choice = input("├   Select option (1-2): ").strip()
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Repair PyShellOS" + "\033[0m" + CURRENT_LINE_THEME * 30)
+        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  Repair PyShellOS" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        choice = input(CURRENT_INFO_THEME + "   Select option (1-2): ").strip()
 
 
         if choice == "1":
@@ -1022,7 +1052,7 @@ def reboot(args):
 
 # Update settings function to use reboot after reset
 def settings(args):
-    global CURRENT_THEME_COLOR
+    global CURRENT_THEME_COLOR, THEME_SYMBOLS
     """Terminal-based settings application."""
     if not is_sudo_active():
         print("Settings can only be accessed with sudo privileges")
@@ -1030,21 +1060,21 @@ def settings(args):
 
     while True:
         current_user = get_current_username()
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Settings Shell Application" + "\033[0m" + "─────────────────────")
-        print("│")
-        print("│ Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + "with permission: " + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "3. System" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "4. Update PyShellOS" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "5. Customize PyShellOS" + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "6. Return to shell" + "\033[0m")
-        print("│")
-        print("└─────────────────────────────────────────────────")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Settings Shell Application" + "\033[0m" + CURRENT_LINE_THEME * 21)
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_SIDE_THEME + " Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + "with permission: " + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. System" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. Update PyShellOS" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. Customize PyShellOS" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "6. Return to shell" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
-        choice = input("\nSelect option (1-5): ").strip()
+        choice = input("\nSelect option (1-6): ").strip()
 
         if choice == "1":
             user_settings()
@@ -1065,43 +1095,106 @@ def settings(args):
 def CustomizeSettings():
     global CURRENT_THEME_COLOR
     while True:
-        print(
-            "┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
-        print("│")
-        theme_input = input(
-            "├   " + CURRENT_THEME_COLOR + "Change Theme (green, yellow, etc.): " + "\033[0m").strip().lower()
-        if theme_input in THEMES:
-            CURRENT_THEME_COLOR = THEMES[theme_input]
-            print("│ Theme changed to " + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
-            if "/" not in fs:
-                fs["/"] = {}
-            if "lib-usr" not in fs["/"]:
-                fs["/"]["lib-usr"] = {}
-            fs["/"]["lib-usr"]["current_theme"] = CURRENT_THEME_COLOR
-            with open("data/filesystem.json", "w") as f:
-                json.dump(fs, f, indent=4)
-        else:
-            print("\033[1;91m│ Unknown theme. Try again.\033[0m")
-        break
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + CURRENT_LINE_THEME * 21)
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 1. Change System color\033[0m")
+        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 2. Change Application Style\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + " 3. Return to settings\033[0m")
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+        choice = input("\nSelect option (1-2): ").strip()
+
+        if choice == "1":
+            print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + CURRENT_LINE_THEME * 21)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   green (default)\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   blue\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   red\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   yellow\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   magenta\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   cyan\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   white\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   grey\033[0m")
+            print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+
+            theme_input = input(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "Change Theme (green, yellow, etc.): " + "\033[0m").strip().lower()
+            if theme_input in THEMES:
+                CURRENT_THEME_COLOR = THEMES[theme_input]
+                print(CURRENT_SIDE_THEME + " Theme changed to " + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
+                if "/" not in fs:
+                    fs["/"] = {}
+                if "lib-usr" not in fs["/"]:
+                    fs["/"]["lib-usr"] = {}
+                fs["/"]["lib-usr"]["current_theme"] = CURRENT_THEME_COLOR
+                with open("data/filesystem.json", "w") as f:
+                    json.dump(fs, f, indent=4)
+            else:
+                print("\033[1;91m│ Unknown theme. Try again.\033[0m")
+            break
+
+        elif choice == "2":
+            print(
+                CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Apps Settings" + "\033[0m" + CURRENT_LINE_THEME * 23)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  1.     Rounded Borders\033[0m")
+            print(CURRENT_INFO_THEME + " ╭" + "─" * 10)
+            print(CURRENT_INFO_THEME + " │")
+            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ╰" + "─" * 10)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  2.       Thin Borders\033[0m")
+            print(CURRENT_INFO_THEME + " ┌" + "─" * 10)
+            print(CURRENT_INFO_THEME + " │")
+            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " └" + "─" * 10)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  3.      Thick Borders\033[0m")
+            print(CURRENT_INFO_THEME + " ┏" + "━" * 10)
+            print(CURRENT_INFO_THEME + " ┃")
+            print(CURRENT_INFO_THEME + " ┣" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ┗" + "━" * 10)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  4. Double Borders (not recommended as the Shell input has the exact same theme.\033[0m")
+            print(CURRENT_INFO_THEME + " ╔" + "═" * 10)
+            print(CURRENT_INFO_THEME + " ║")
+            print(CURRENT_INFO_THEME + " ╠" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ╚" + "═" * 10)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  5. Return to settings\033[0m")
+            print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+            choice = input("\nSelect option (1-5): ").strip()
+
+            if choice == "5":
+                break
+            elif choice in ("1", "2", "3", "4"):
+                fs["/"]["lib-usr"]["current_theme_id"] = choice
+                save_filesystem(fs)
+                load_current_theme(fs)
+                print(f"Changed current theme to {choice}. Please reboot in order to apply changes.")
+                break
+            else:
+                print("\033[91mInvalid selection. Please choose 1-5.\033[0m")
+
 
 def system_info():
     global CURRENT_THEME_COLOR
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Info" + "\033[0m" + "────────────────────────────────────")
-        print("│" + CURRENT_THEME_COLOR + "            OS: PyShellOS-01.02-Beta"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + f"  Architecture: {platform.machine()}"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + "         Shell: PyshellOS-Terminal"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + "        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber"+"\033[0m")
-        print("│" + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "3. Return" + "\033[0m")
-        print("│")
-        print("└───────────────────────────────────────────────")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Info" + "\033[0m" + CURRENT_LINE_THEME * 37)
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "            OS: PyShellOS-01.02-Beta"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"  Architecture: {platform.machine()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "         Shell: PyshellOS-Terminal"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "       Version: PyShellOS-3.1.Beta - The Customization Update"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. Return" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
         choice = input("\nSelect option (1): ").strip()
 
         if choice == "1":
@@ -1118,18 +1211,18 @@ def user_settings():
     """Handle user-related settings."""
     while True:
         current_user = get_current_username()
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "User Settings" + "\033[0m" + "──────────────────────────────────")
-        print("|")
-        print("│ Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user}" + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "1. Change Username" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "2. Change Password" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "3. Add User" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "4. Remove User" + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "5. Back" + "\033[0m")
-        print("│")
-        print("└───────────────────────────────────────────────")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "User Settings" + "\033[0m" + CURRENT_LINE_THEME * 34)
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_SIDE_THEME + " Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user}" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. Change Username" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. Change Password" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. Add User" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. Remove User" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. Back" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
         choice = input("\nSelect option (1-5): ").strip()
 
@@ -1198,7 +1291,7 @@ def update_settings():
         print("│")
         print("├   " + CURRENT_THEME_COLOR + "2. Back" + "\033[0m")
         print("│")
-        print("└───────────────────────────────────────────────")
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
         choice = input("\nSelect option (1-2): ").strip()
 
@@ -1225,7 +1318,7 @@ def system_settings():
         print("│")
         print("├   " + CURRENT_THEME_COLOR + "6. Back" + "\033[0m")
         print("│")
-        print("└───────────────────────────────────────────────")
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
         choice = input("\nSelect option (1-5): ").strip()
 
@@ -1509,12 +1602,12 @@ def system_settings():
 def first_boot_setup():
     global CURRENT_THEME_COLOR
     """Initial setup when running the system for the first time."""
-    print(f"┌" + CURRENT_THEME_COLOR + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
-    print("│")
-    print(f"│" + CURRENT_THEME_COLOR + " Skip or create a user account (1-2)" + "\033[0m")
-    print(f"├" + CURRENT_THEME_COLOR + " 1 - create user account" + "\033[0m")
-    print(f"├" + CURRENT_THEME_COLOR + " 2 - use temporary account" + "\033[0m")
-    choice = input(f"│" + CURRENT_THEME_COLOR + " Select option: " + "\033[0m").strip()
+    print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " Skip or create a user account (1-2)" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " 1 - create user account" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " 2 - use temporary account" + "\033[0m")
+    choice = input(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + " Select option: " + "\033[0m").strip()
 
     global USERS
     USERS = {
@@ -1523,26 +1616,26 @@ def first_boot_setup():
 
     if choice == "1":
         while True:
-            username = input(f"├" + CURRENT_THEME_COLOR + "Enter username: " + "\033[0m").strip()
+            username = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Enter username: " + "\033[0m").strip()
             if not username:
-                print("├" + "\033[91m" + "Username cannot be empty" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + "Username cannot be empty" + "\033[0m")
                 continue
             if username.lower() == 'root':
-                print("├" + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
                 continue
             if not username.isalnum():
-                print("├" + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
                 continue
             break
 
         while True:
-            password = input("├" + CURRENT_THEME_COLOR + "Enter password: " + "\033[0m").strip()
+            password = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Enter password: " + "\033[0m").strip()
             if not password:
-                print("├" + "\033[91m" + "Password cannot be empty" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + "Password cannot be empty" + "\033[0m")
                 continue
-            confirm_password = input("├" + CURRENT_THEME_COLOR + "Confirm password: " + "\033[0m").strip()
+            confirm_password = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Confirm password: " + "\033[0m").strip()
             if password != confirm_password:
-                print("├" + "\033[91m" + "Passwords do not match" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + "Passwords do not match" + "\033[0m")
                 continue
             break
 
@@ -1571,11 +1664,11 @@ def first_boot_setup():
             }
         }
 
-        print("│User account created successfully!")
-        print(f"│Username: {username}")
-        print("│System initialization complete.")
-        print("│The system will now start")
-        print("│")
+        print(CURRENT_SIDE_THEME + "User account created successfully!")
+        print(CURRENT_INFO_THEME + f"Username: {username}")
+        print(CURRENT_SIDE_THEME + "│System initialization complete.")
+        print(CURRENT_SIDE_THEME + "│The system will now start")
+        print(CURRENT_SIDE_THEME)
 
         # Set current user
         global CURRENT_USER
@@ -1589,9 +1682,9 @@ def first_boot_setup():
 
     elif choice == "2":
         USERS["temp_user"] = {"password": "root"}
-        print("Temporary User account created!")
-        print("To create a account run `sudo adduser [username]`")
-        print("To switch to new account run `sudo su [username]`")
+        print(CURRENT_SIDE_THEME + "Temporary User account created!")
+        print(CURRENT_SIDE_THEME + "To create a account run `sudo adduser [username]`")
+        print(CURRENT_SIDE_THEME + "To switch to new account run `sudo su [username]`")
 
 
 def check_first_boot():
@@ -1649,17 +1742,17 @@ def neofetch(args=None):
     """Show system information."""
     print("\n=== PyShellOS System Information ===")
     print("\nSystem Information:")
-    print(f" /$$$$$$$              - OS: PyShellOS-01-01-Beta")
-    print(f" | $$__  $$            - OS: {platform.system()} {platform.release()}")
-    print(f" | $$  \ $$ /$$   /$$  - Architecture: {platform.machine()}")
-    print(f" | $$$$$$$/| $$  | $$  - Python: {platform.python_version()}")
-    print(f" | $$____/ | $$  | $$  - Shell: PyShellOS-Terminal")
-    print(f" | $$      | $$  | $$  - Disk: {round(used / (1024 ** 3), 2)} GB used / {round(total / (1024 ** 3), 2)} GB total")
-    print(f" | $$      |  $$$$$$$  - Python: Py3")
-    print(f" |__/       \____  $$  - Shell: PyShellOS-Terminal")
-    print(f"             /$$  | $$")
-    print(f"            |  $$$$$$/")
-    print(f"             \______/")
+    print(fr" /$$$$$$$              - OS: PyShellOS-01-01-Beta")
+    print(fr" | $$__  $$            - OS: {platform.system()} {platform.release()}")
+    print(fr" | $$  \ $$ /$$   /$$  - Architecture: {platform.machine()}")
+    print(fr" | $$$$$$$/| $$  | $$  - Python: {platform.python_version()}")
+    print(fr" | $$____/ | $$  | $$  - Shell: PyShellOS-Terminal")
+    print(fr" | $$      | $$  | $$  - Disk: {round(used / (1024 ** 3), 2)} GB used / {round(total / (1024 ** 3), 2)} GB total")
+    print(fr" | $$      |  $$$$$$$  - Python: Py3")
+    print(fr" |__/       \____  $$  - Shell: PyShellOS-Terminal")
+    print(fr"             /$$  | $$")
+    print(fr"            |  $$$$$$/")
+    print(fr"             \______/")
 
 
 def info(args):
@@ -1676,25 +1769,25 @@ def info(args):
         return
     elif args == "-u" or args == "--users":
         print("info: Show all users on the system:")
-        print("┌User Commands────────┬──────────────────────────")
-        print("│                " + "│")
-        print("│ Show all user  " + "│")
-        print("│ commands       " + "│")
-        print("│                " + "│")
-        print("│ -u = username  " + "│")
-        print("│                " + "│")
-        print("├ whoami         " + "│" + " Show current user")
-        print("├ adduser -u     " + "│" + " Add an user")
-        print("├ su -u          " + "│" + " Switch to a user")
-        print("├ users          " + "│" + " Show all users")
-        print("├ logout         " + "│" + " Logout of the current user")
-        print("│                " + "│")
-        print("└─────────────────────┴─────────────────────────")
+        print(CURRENT_SIDE_THEME + "┌User Commands" + CURRENT_LINE_THEME * 8 + "┬"+ CURRENT_LINE_THEME * 25)
+        print(CURRENT_SIDE_THEME + "                " + "│")
+        print(CURRENT_SIDE_THEME + "│ Show all user  " + "│")
+        print(CURRENT_SIDE_THEME + "│ commands       " + "│")
+        print(CURRENT_SIDE_THEME + "│                " + "│")
+        print(CURRENT_SIDE_THEME + "│ -u = username  " + "│")
+        print(CURRENT_SIDE_THEME + "│                " + "│")
+        print(CURRENT_SIDE_THEME + "├ whoami         " + "│" + " Show current user")
+        print(CURRENT_SIDE_THEME + "├ adduser -u     " + "│" + " Add an user")
+        print(CURRENT_SIDE_THEME + "├ su -u          " + "│" + " Switch to a user")
+        print(CURRENT_SIDE_THEME + "├ users          " + "│" + " Show all users")
+        print(CURRENT_SIDE_THEME + "├ logout         " + "│" + " Logout of the current user")
+        print(CURRENT_SIDE_THEME + "│                " + "│")
+        print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 21 + "┴" + CURRENT_LINE_THEME * 25)
         return
 
     elif args == "-f" or args == "--f" or args == "-file" or args == "--file" or args == "-filesystem" or args == "--filesystem" or args == "-fs" or args == "--fs":
         print("info: Show all users on the system:")
-        print("┌Filesystem Commands──┬───────────────────────────")
+        print("┌Filesystem Commands" + CURRENT_LINE_THEME * 2 + "┬" + CURRENT_LINE_THEME * 25)
         print("│                " + "│")
         print("│ Show all file  " + "│")
         print("│ system-        " + "│")
@@ -1790,7 +1883,6 @@ def init_commands():
 # Update the main block to use login()
 if __name__ == "__main__":
     print("Booting PyShellOS...")
-    print("If you see a Syntax Error above the boot, ignore it!")
     time.sleep(1)
     print("\nPlease wait")
     time.sleep(0.2)
@@ -1859,16 +1951,16 @@ if __name__ == "__main__":
 
 
     init_commands()
-    print(f"│" + "\033[1;32m" + " /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
-    print(f"│" + "\033[1;32m" + " |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
-    print(f"│" + "\033[1;32m" + "            /$$  | $$" + "\033[0m")
-    print(f"│" + "\033[1;32m" + "           |  $$$$$$/" + "\033[0m")
-    print(f"│" + "\033[1;32m" + "            \______/" + "\033[0m")
-    print(f"└───────────────────────────────────────────────")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$__  $$          /&&__  $$| $$                | $$| $$ /$$__  $$ /$$__  $$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$  \ $$ /$$   /$$| $$  \__/| $$$$$$$   /$$$$$$ | $$| $$| $$  \ $$| $$  \__/" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$$$$$$/| $$  | $$|  $$$$$$ | $$__  $$ /$$__  $$| $$| $$| $$  | $$|  $$$$$$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$____/ | $$  | $$ \____  $$| $$  \ $$| $$$$$$$$| $$| $$| $$  | $$ \____  $$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$      | $$  | $$ /$$  \ $$| $$  | $$| $$_____/| $$| $$| $$  | $$ /$$  \ $$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" | $$      |  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$$| $$| $$|  $$$$$$/|  $$$$$$/" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r" |__/       \____  $$ \______/ |__/  |__/ \_______/|__/|__/ \______/  \______/" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r"            /$$  | $$" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r"           |  $$$$$$/" + "\033[0m")
+    print(CURRENT_SIDE_THEME + "\033[1;32m" + r"            \______/" + "\033[0m")
+    print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
     shell()

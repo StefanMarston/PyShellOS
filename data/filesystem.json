@@ -65,7 +65,7 @@
         "home": {},
         "lib-usr": {
             "current_theme": "\u001b[1;91m",
-            "current_theme_id": "4",
+            "current_theme_id": "1",
             "themes": {
                 "1": {
                     "INFO": "ROUNDED_INFO",
@@ -84,7 +84,7 @@
                 "3": {
                     "INFO": "THICK_INFO",
                     "LINE": "THICK_LINE",
-                    "TOP": "HICK_TOP",
+                    "TOP": "THICK_TOP",
                     "SIDE": "THICK_SIDE",
                     "BOTTOM": "THICK_BOTTOM"
                 },
