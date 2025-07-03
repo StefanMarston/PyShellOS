@@ -62,8 +62,11 @@
             ".userdata": {}
         },
         "lib": {},
-        "home": {},
+        "home": {
+            "new.txt": "stack begin:\n  start firstL: codeIN.txt\n    codeIn.txt = Hello World\n    code.In.txt == executable\n  end firstL;\n  start SecL: codeIn::2\n    codeIn.txt mov : Echo\n    echo codeIn.firstL\n  end SecL;\nstack end;\nstack approve;\nstack run;"
+        },
         "lib-usr": {
+            "current_language": "en",
             "current_theme": "\u001b[1;91m",
             "current_theme_id": "1",
             "themes": {

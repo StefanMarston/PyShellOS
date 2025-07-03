@@ -11,10 +11,46 @@ import os
 import sys
 import threading
 import time
+from itertools import repeat
 from os import CLONE_VM
 from random import choice
 
-CURRENT_THEME_COLOR = "\033[1;32m"  # Standard: grün
+import json
+import os
+
+def get_current_language_from_virtual_fs():
+    fs_path = "data/filesystem.json"
+    lang_data_path = "data/languages.json"
+
+    if not os.path.exists(fs_path):
+        raise FileNotFoundError("filesystem.json nicht gefunden")
+
+    with open(fs_path, "r", encoding="utf-8") as f:
+        fs = json.load(f)
+
+    try:
+        # Sprache als string direkt
+        lang_code = fs["/"]["lib-usr"]["current_language"]
+        if not isinstance(lang_code, str):
+            raise ValueError("Sprache muss ein String sein (z. B. 'en', 'de')")
+    except Exception as e:
+        raise ValueError(f"Fehler beim Lesen der Sprache aus filesystem.json: {e}")
+
+    if not os.path.exists(lang_data_path):
+        raise FileNotFoundError("languages.json nicht gefunden")
+
+    with open(lang_data_path, "r", encoding="utf-8") as f:
+        all_languages = json.load(f)
+
+    if lang_code not in all_languages:
+        raise ValueError(f"Sprache '{lang_code}' nicht in languages.json gefunden")
+
+    return all_languages[lang_code]
+
+
+
+
+CURRENT_THEME_COLOR = "\033[1;32m"
 THEMES = {
     "green": "\033[1;32m",
     "yellow": "\033[1;93m",
@@ -233,7 +269,6 @@ SUDO_LOCKED_UNTIL = 0
 
 
 def get_dir(path_list):
-    """Navigate in virtual FS using current path."""
     d = fs["/"]
     for p in path_list[1:]:
         d = d.get(p, {})
@@ -829,8 +864,9 @@ def help_cmd(args):
 
 
 def shell():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR, CURRENT_USER
-    print("Type 'help' for command list")
+    print(lang["help_info"])
 
     while LOGGED_IN:
         current_user = get_current_username()
@@ -850,7 +886,7 @@ def shell():
             elif cmd in commands:
                 commands[cmd](args)
             else:
-                print(f"command `{cmd}`: Not found. Try 'help' for available commands.")
+                print(lang["help_info_error_main"] + f"{cmd}" + lang["help_info_error"])
         except KeyboardInterrupt:
             print("\nUse 'exit' to shutdown system")
         except Exception as e:
@@ -913,7 +949,7 @@ def nano(args):
         while True:
             try:
                 line = input()
-                if line == ':sy':
+                if line == ':sv':
                     # Save and exit
                     new_content = '\n'.join(lines)
                     d[filename] = new_content
@@ -1052,6 +1088,7 @@ def reboot(args):
 # Update settings function to use reboot after reset
 def settings(args):
     global CURRENT_THEME_COLOR, THEME_SYMBOLS
+    lang = get_current_language_from_virtual_fs()
     """Terminal-based settings application."""
     if not is_sudo_active():
         print("Settings can only be accessed with sudo privileges")
@@ -1059,21 +1096,21 @@ def settings(args):
 
     while True:
         current_user = get_current_username()
-        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Settings Shell Application" + "\033[0m" + CURRENT_LINE_THEME * 21)
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["settings"] + "\033[0m" + CURRENT_LINE_THEME * 21)
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_SIDE_THEME + " Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + "with permission: " + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
+        print(CURRENT_SIDE_THEME + lang["current_user_wording"] + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + lang["with_permission_wording"] + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. System" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. Update PyShellOS" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. Customize PyShellOS" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["user_settings_option"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["general_settings_option"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. " + lang["system_settings_option"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. " + lang["update_settings_option"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. " + lang["customize_settings_option"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "6. Return to shell" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "6. " + lang["return_shell_settings_option"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
-        choice = input("\nSelect option (1-6): ").strip()
+        choice = input(lang["option_6"]).strip()
 
         if choice == "1":
             user_settings()
@@ -1086,40 +1123,41 @@ def settings(args):
         elif choice == "5":
             CustomizeSettings()
         elif choice == "6":
-            print("Exiting settings...")
+            print(lang["exit_settings"])
             break
         else:
-            print("Invalid option")
+            print(lang["Invalid_option"])
 
 def CustomizeSettings():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
     while True:
-        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + CURRENT_LINE_THEME * 21)
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["settings"] + "\033[0m" + CURRENT_LINE_THEME * 21)
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 1. Change System color\033[0m")
-        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 2. Change Application Style\033[0m")
+        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 1." + lang["change_system_color_settings"] + "\033[0m")
+        print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR +   " 2." + lang["change_app_style_settings"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + " 3. Return to settings\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + " 3. " + lang["return_to_settings"] + "\033[0m")
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
-        choice = input("\nSelect option (1-2): ").strip()
+        choice = input(lang["option_2"]).strip()
 
         if choice == "1":
-            print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + CURRENT_LINE_THEME * 21)
+            print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["settings"] + "\033[0m" + CURRENT_LINE_THEME * 21)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   green (default)\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   blue\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   red\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   yellow\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   magenta\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   cyan\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   white\033[0m")
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "   grey\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["green_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["blue_color_custom_settings" + "\033[0m"])
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["red_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["yellow_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["magenta_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["cyan_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["white_color_custom_settings"] + "\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["grey_color_custom_settings"] + "\033[0m")
             print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
-            theme_input = input(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "Change Theme (green, yellow, etc.): " + "\033[0m").strip().lower()
+            theme_input = input(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang["change_theme_input_custom_settings"] + "\033[0m").strip().lower()
             if theme_input in THEMES:
                 CURRENT_THEME_COLOR = THEMES[theme_input]
-                print(CURRENT_SIDE_THEME + " Theme changed to " + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
+                print(CURRENT_SIDE_THEME + lang["theme_success_custom_settings"] + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
                 if "/" not in fs:
                     fs["/"] = {}
                 if "lib-usr" not in fs["/"]:
@@ -1128,40 +1166,40 @@ def CustomizeSettings():
                 with open("data/filesystem.json", "w") as f:
                     json.dump(fs, f, indent=4)
             else:
-                print("\033[1;91m│ Unknown theme. Try again.\033[0m")
+                print("\033[1;91m" + CURRENT_SIDE_THEME + lang["theme_error_custom_settings_unknown"] + "\033[0m")
             break
 
         elif choice == "2":
             print(
-                CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Apps Settings" + "\033[0m" + CURRENT_LINE_THEME * 23)
+                CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["apps_settings_wording"] + "\033[0m" + CURRENT_LINE_THEME * 23)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  1.     Rounded Borders\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  1.     " + lang["apps_settings_rounded_boarders_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ╭" + "─" * 10)
             print(CURRENT_INFO_THEME + " │")
-            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + lang["apps_settings_description_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ╰" + "─" * 10)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  2.       Thin Borders\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  2.       " + lang["apps_settings_thin_boarders_wording"] +"\033[0m")
             print(CURRENT_INFO_THEME + " ┌" + "─" * 10)
             print(CURRENT_INFO_THEME + " │")
-            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ├" + CURRENT_THEME_COLOR + lang["apps_settings_description_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " └" + "─" * 10)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  3.      Thick Borders\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  3.      " + lang["apps_settings_thick_boarders_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ┏" + "━" * 10)
             print(CURRENT_INFO_THEME + " ┃")
-            print(CURRENT_INFO_THEME + " ┣" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ┣" + CURRENT_THEME_COLOR + lang["apps_settings_description_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ┗" + "━" * 10)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  4. Double Borders (not recommended as the Shell input has the exact same theme.\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  4. " + lang["apps_settings_double_boarders_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ╔" + "═" * 10)
             print(CURRENT_INFO_THEME + " ║")
-            print(CURRENT_INFO_THEME + " ╠" + CURRENT_THEME_COLOR + "  description\033[0m")
+            print(CURRENT_INFO_THEME + " ╠" + CURRENT_THEME_COLOR + lang["apps_settings_description_wording"] + "\033[0m")
             print(CURRENT_INFO_THEME + " ╚" + "═" * 10)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  5. Return to settings\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  5. " + lang["return_to_settings"] + "\033[0m")
             print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
-            choice = input("\nSelect option (1-5): ").strip()
+            choice = input(lang["option_5"]).strip()
 
             if choice == "5":
                 break
@@ -1169,32 +1207,33 @@ def CustomizeSettings():
                 fs["/"]["lib-usr"]["current_theme_id"] = choice
                 save_filesystem(fs)
                 load_current_theme(fs)
-                print(f"Changed current theme to {choice}. Please reboot in order to apply changes.")
+                print(lang["accepted_request_token"] + f"{choice}." + lang["reboot_request_changes"])
                 break
             else:
-                print("\033[91mInvalid selection. Please choose 1-5.\033[0m")
+                print("\033[91m" + lang["invalid_option"] + "\033[0m")
 
 
 def system_info():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
     while True:
-        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "System Info" + "\033[0m" + CURRENT_LINE_THEME * 37)
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "            OS: PyShellOS-01.02-Beta"+"\033[0m")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_info"] + "\033[0m" + CURRENT_LINE_THEME * 37)
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "             OS: PyShellOS-01.02-Beta"+"\033[0m")
         print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
         print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"  Architecture: {platform.machine()}"+"\033[0m")
         print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "         Shell: PyshellOS-Terminal"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "       Version: PyShellOS-3.1.Beta - The Customization Update"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "          Shell: PyshellOS-Terminal"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "        Version: PyShellOS-3.1.Beta - The Customization Update"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "         Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "      Publisher: Stefan Kilber"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "           Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. User Settings" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. General" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. Return" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["user_settings"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang["general_settings_option"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang["return_to_settings"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
-        choice = input("\nSelect option (1): ").strip()
+        choice = input(lang["option_3"]).strip()
 
         if choice == "1":
             user_settings()
@@ -1203,96 +1242,98 @@ def system_info():
         elif choice == "3":
             break
         else:
-            print("Invalid option")
+            print(lang["invalid_option"])
 
 def user_settings():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
     """Handle user-related settings."""
     while True:
         current_user = get_current_username()
-        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "User Settings" + "\033[0m" + CURRENT_LINE_THEME * 34)
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["user_settings"] + "\033[0m" + CURRENT_LINE_THEME * 34)
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_SIDE_THEME + " Currently logged in as user: " + CURRENT_THEME_COLOR + f"{current_user}" + "\033[0m")
+        print(CURRENT_SIDE_THEME + lang["current_user_wording"] + CURRENT_THEME_COLOR + f"{current_user}" + "\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. Change Username" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. Change Password" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. Add User" + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. Remove User" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["change_user_name"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["change_user_pass"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. " + lang["change_user_auth"] + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. " + lang["change_user_rmff"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. Back" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. " + lang["return_to_settings"] + "\033[0m")
         print(CURRENT_SIDE_THEME)
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
-        choice = input("\nSelect option (1-5): ").strip()
+        choice = input(lang["option_5"]).strip()
 
         if choice == "1":
-            new_username = input("Enter new username: ").strip()
+            new_username = input(lang["change_user_name_input"]).strip()
             if new_username:
                 if new_username in USERS:
-                    print("Username already exists!")
+                    print(lang["change_user_name_input_error_exist"])
                 else:
                     USERS[new_username] = USERS[current_user]
                     del USERS[current_user]
                     global CURRENT_USER
                     CURRENT_USER = new_username
-                    print("Username updated successfully!")
+                    print(lang["change_user_name_input_success"])
             else:
-                print("Username cannot be empty")
+                print(lang["change_user_name_input_error_empty"])
 
         elif choice == "2":
-            new_password = input("Enter new password: ").strip()
-            confirm_password = input("Confirm new password: ").strip()
+            new_password = input(lang["change_user_pass_input"]).strip()
+            confirm_password = input(lang["change_user_pass_input_confirmation"]).strip()
             if not new_password:
-                print("Password cannot be empty")
+                print(lang["change_user_pass_input_error_empty"])
             elif new_password != confirm_password:
-                print("Passwords do not match")
+                print(lang["change_user_pass_input_error_match"])
             else:
                 USERS[current_user]["password"] = new_password
-                print("Password updated successfully!")
+                print(lang["change_user_pass_input_success"])
 
         elif choice == "3":
-            username = input("Enter new username: ").strip()
+            username = input(lang["change_user_name_input"]).strip()
             if username in USERS:
-                print("User already exists!")
+                print(lang["change_user_name_input_error_exist"])
             else:
-                password = input("Enter password: ").strip()
-                confirm = input("Confirm password: ").strip()
+                password = input(lang["password_enter"]).strip()
+                confirm = input(lang["change_user_pass_input_confirmation"]).strip()
                 if password != confirm:
-                    print("Passwords do not match!")
+                    print(lang["change_user_pass_input_error_match"])
                 else:
                     USERS[username] = {"password": password}
-                    print(f"User {username} created successfully!")
+                    print(lang["user_wording"] + f" {username}" + lang["created_successfully_wording"])
 
         elif choice == "4":
-            username = input("Enter username to remove: ").strip()
+            username = input(lang["user_remove_option"]).strip()
             if username == "root":
-                print("Cannot remove root user!")
+                print(lang["user_remove_option_input_error_root"])
             elif username not in USERS:
-                print("User does not exist!")
+                print(lang["user_remove_option_input_error_exist_false"])
             else:
-                confirm = input(f"Are you sure you want to remove user {username}? (y/N): ").strip().lower()
+                confirm = input(lang["user_remove_option_input_acceptance_request_token"] + f" {username}?" + lang["yes_no_request"]).strip().lower()
                 if confirm == 'y':
                     del USERS[username]
-                    print(f"User {username} removed successfully!")
+                    print(lang["user_wording"] + f" {username}" + lang["user_remove_option_input_success"] )
 
         elif choice == "5":
             break
         else:
-            print("Invalid option")
+            print(lang["invalid_option"])
 
 def update_settings():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "Update Settings" + "\033[0m" + "────────────────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
         print("│")
-        print("├    Current Version: PyShellOS-01.02-Beta")
-        print("├   " + CURRENT_THEME_COLOR + "1. Update version" + "\033[0m")
+        print("├    " + lang["current_version_info_table"] + "PyShellOS-01.02-Beta")
+        print("├   " + CURRENT_THEME_COLOR + "1. " + lang["update_version"] + "\033[0m")
         print("│")
-        print("├   " + CURRENT_THEME_COLOR + "2. Back" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. " + lang["return_to_settings"] + "\033[0m")
         print("│")
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
-        choice = input("\nSelect option (1-2): ").strip()
+        choice = input(lang["option_2"]).strip()
 
         if choice == "1":
             update_main_py_and_restart()
@@ -1300,22 +1341,23 @@ def update_settings():
         elif choice == "2":
             break
         else:
-            print("Invalid option")
+            print(lang["invalid_option"])
 
 
 def system_settings():
     global CURRENT_THEME_COLOR,  CURRENT_APP_THEME
+    lang = get_current_language_from_virtual_fs()
     """Handle system-related settings."""
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + "System Settings" + "\033[0m" + "────────────────────────────────")
+        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
         print("│")
-        print("├   " + CURRENT_THEME_COLOR + "1. Reset PyShellOS" + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "2. Restart PyShellOS" + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "3. Bulk Remove All Users" + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "4. Show security Info" + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "5. Change Theme" + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "1. " + lang["system_settings_reset_option"] + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "2. " + lang["system_settings_restart_option"] + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "3. " + lang["system_settings_bulk_remove_option"] + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "4. " + lang["system_settings_show_security_option"] + "\033[0m" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "5. " + lang["system_settings_show_theme_option"] + "\033[0m" + "\033[0m")
         print("│")
-        print("├   " + CURRENT_THEME_COLOR + "6. Back" + "\033[0m")
+        print("├   " + CURRENT_THEME_COLOR + "6. " + lang["return_to_settings"] + "\033[0m")
         print("│")
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
@@ -1598,15 +1640,120 @@ def system_settings():
         else:
             print("Invalid option")
 
+def move_cursor_up(n=1):
+    sys.stdout.write(f"\033[{n}A")
+def clear_line():
+    sys.stdout.write("\033[2K\r")
+def clear_screen():
+    os.system("cls" if os.name == "nt" else "clear")
 def first_boot_setup():
+    lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
-    """Initial setup when running the system for the first time."""
-    print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + "Welcome to PyShellOS First-Time Setup" + "\033[0m" + f"──{datetime.now().strftime("%H:%M:%S")}───")
+    greetings = ["Hallo", "Hello", "bonjour", "привет", "こんにちは", "안녕하세요", "مرحبا", "Benvenuto"]
+    for word in greetings:
+        for i in range(1, len(word) + 1):
+            partical = word[:i]
+            clear_screen()
+            print(CURRENT_TOP_THEME + CURRENT_LINE_THEME + CURRENT_THEME_COLOR + lang["first_boot_setup"] + "\033[0m" + CURRENT_LINE_THEME * 33)
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + f"{partical}\033[0m")
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["continue"] + "\033[0m")
+            print(CURRENT_SIDE_THEME)
+            print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+
+            time.sleep(0.5)
+        time.sleep(0.5)
+    input()
+    clear_screen()
+    first_boot_setup_3()
+
+def set_language_in_virtual_fs_setting(lang_code):
+    fs_path = "data/filesystem.json"
+
+    with open(fs_path, "r", encoding="utf-8") as f:
+        fs = json.load(f)
+
+    if "/" not in fs or "lib-usr" not in fs["/"]:
+        raise ValueError("Directory /lib-usr is missing. FATAL ERROR as ALL config files are missing!.")
+
+    fs["/"]["lib-usr"]["current_language"] = lang_code
+
+    with open(fs_path, "w", encoding="utf-8") as f:
+        json.dump(fs, f, indent=2, ensure_ascii=False)
+
+def first_boot_setup_3():
+    lang = get_current_language_from_virtual_fs()
+    global CURRENT_THEME_COLOR
+    print(CURRENT_TOP_THEME + CURRENT_LINE_THEME + CURRENT_THEME_COLOR + lang["first_boot_setup"] + "\033[0m" + CURRENT_LINE_THEME * 33)
     print(CURRENT_SIDE_THEME)
-    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " Skip or create a user account (1-2)" + "\033[0m")
-    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " 1 - create user account" + "\033[0m")
-    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + " 2 - use temporary account" + "\033[0m")
-    choice = input(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + " Select option: " + "\033[0m").strip()
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Select your Language." + "\033[0m")
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "1. English" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "2. Deutsch" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "3. Русский" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "4. Español" + "\033[0m")
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+    choice = input("\nSelect option (1-4): ").strip()
+    lang_map = {
+        "1": "en",
+        "english": "en",
+        "2": "de",
+        "deutsch": "de",
+        "3": "ru",
+        "Русский": "ru",
+        "4": "es",
+        "Español": "es"
+    }
+    if choice in lang_map:
+        set_language_in_virtual_fs_setting(lang_map[choice])
+        first_boot_setup_4()
+    else:
+        print("Error: Not supported language! You can request it on GitHub.")
+        first_boot_setup_3()
+
+def first_boot_setup_4():
+    lang = get_current_language_from_virtual_fs()
+    global CURRENT_THEME_COLOR
+    print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["settings"] + "\033[0m" + CURRENT_LINE_THEME * 21)
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["green_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["blue_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["red_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["yellow_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["magenta_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["cyan_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["white_color_custom_settings"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["grey_color_custom_settings"] + "\033[0m")
+    print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+
+    theme_input = input(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang[
+        "change_theme_input_custom_settings"] + "\033[0m").strip().lower()
+    if theme_input in THEMES:
+        CURRENT_THEME_COLOR = THEMES[theme_input]
+        print(CURRENT_SIDE_THEME + lang["theme_success_custom_settings"] + CURRENT_THEME_COLOR + f"{theme_input}." + "\033[0m")
+        first_boot_setup_2()
+        if "/" not in fs:
+            fs["/"] = {}
+        if "lib-usr" not in fs["/"]:
+            fs["/"]["lib-usr"] = {}
+        fs["/"]["lib-usr"]["current_theme"] = CURRENT_THEME_COLOR
+        with open("data/filesystem.json", "w") as f:
+            json.dump(fs, f, indent=4)
+    else:
+        print("\033[1;91m" + CURRENT_SIDE_THEME + lang["theme_error_custom_settings_unknown"] + "\033[0m")
+        first_boot_setup_4()
+
+def first_boot_setup_2():
+    lang = get_current_language_from_virtual_fs()
+    print(CURRENT_TOP_THEME + CURRENT_LINE_THEME + CURRENT_THEME_COLOR + lang["first_boot_setup"] + "\033[0m" + CURRENT_LINE_THEME * 33)
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  1." + lang["create_acc"] + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "  2." + lang["temp_acc"] + "\033[0m")
+    print(CURRENT_SIDE_THEME)
+    print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+    choice = input(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + lang["option_2"] + "\033[0m").strip()
 
     global USERS
     USERS = {
@@ -1615,12 +1762,12 @@ def first_boot_setup():
 
     if choice == "1":
         while True:
-            username = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Enter username: " + "\033[0m").strip()
+            username = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["username_enter"] + "\033[0m").strip()
             if not username:
-                print(CURRENT_INFO_THEME + "\033[91m" + "Username cannot be empty" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + lang["username_error_empty"] + "\033[0m")
                 continue
             if username.lower() == 'root':
-                print(CURRENT_INFO_THEME + "\033[91m" + "Cannot use 'root' as username" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + lang["username_error_root"] + "\033[0m")
                 continue
             if not username.isalnum():
                 print(CURRENT_INFO_THEME + "\033[91m" + "Username must contain only letters and numbers" + "\033[0m")
@@ -1628,13 +1775,13 @@ def first_boot_setup():
             break
 
         while True:
-            password = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Enter password: " + "\033[0m").strip()
+            password = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["password_enter"] + "\033[0m").strip()
             if not password:
-                print(CURRENT_INFO_THEME + "\033[91m" + "Password cannot be empty" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + lang["password_error_empty"] + "\033[0m")
                 continue
             confirm_password = input(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "Confirm password: " + "\033[0m").strip()
             if password != confirm_password:
-                print(CURRENT_INFO_THEME + "\033[91m" + "Passwords do not match" + "\033[0m")
+                print(CURRENT_INFO_THEME + "\033[91m" + lang["password_error_match"] + "\033[0m")
                 continue
             break
 
@@ -1663,10 +1810,8 @@ def first_boot_setup():
             }
         }
 
-        print(CURRENT_SIDE_THEME + "User account created successfully!")
-        print(CURRENT_INFO_THEME + f"Username: {username}")
-        print(CURRENT_SIDE_THEME + "│System initialization complete.")
-        print(CURRENT_SIDE_THEME + "│The system will now start")
+        print(CURRENT_SIDE_THEME + lang["user_success"])
+        print(CURRENT_INFO_THEME + lang["username_word"] +  f" {username}")
         print(CURRENT_SIDE_THEME)
 
         # Set current user
@@ -1681,9 +1826,9 @@ def first_boot_setup():
 
     elif choice == "2":
         USERS["temp_user"] = {"password": "root"}
-        print(CURRENT_SIDE_THEME + "Temporary User account created!")
-        print(CURRENT_SIDE_THEME + "To create a account run `sudo adduser [username]`")
-        print(CURRENT_SIDE_THEME + "To switch to new account run `sudo su [username]`")
+        print(CURRENT_SIDE_THEME + lang["temp_success"])
+        print(CURRENT_SIDE_THEME + lang["temp_tip_1"])
+        print(CURRENT_SIDE_THEME + lang["temp_tip_2"])
 
 
 def check_first_boot():
