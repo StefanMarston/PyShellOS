@@ -47,9 +47,6 @@ def get_current_language_from_virtual_fs():
 
     return all_languages[lang_code]
 
-
-
-
 CURRENT_THEME_COLOR = "\033[1;32m"
 THEMES = {
     "green": "\033[1;32m",
@@ -105,7 +102,6 @@ else:
         }
     }
 
-
 FILESYSTEM_PATH = "data/filesystem.json"
 
 with open("data/filesystem.json", "r") as f:
@@ -124,7 +120,6 @@ CURRENT_SIDE_THEME   = THEME_SYMBOLS.get(theme.get("SIDE"))
 CURRENT_BOTTOM_THEME = THEME_SYMBOLS.get(theme.get("BOTTOM"))
 CURRENT_INFO_THEME   = THEME_SYMBOLS.get(theme.get("INFO"))
 
-
 def load_current_theme(fs):
     theme_id = fs["/"]["lib-usr"].get("current_theme_id", "1")
     theme_def = fs["/"]["lib-usr"]["themes"].get(theme_id)
@@ -142,13 +137,11 @@ def save_filesystem(fs):
 ENCODE_MAP = {
     "!": "heK", "?": "Evt", ".": "Wpa", "1": "gr", "2": "0w", "3": "s7", "4": "92j", "@": "qJs", "&": "Zbg", "-": "mMg", "a": "0b", "A": "0B", "b": "ab", "B": "AB", "c": "Bd", "5": "a0", "6": "64", "7": "362", "8": "he", "9": "s", "0": "b", "C": "BD", "d": "cE", "D": "CE", "e": "df", "E": "DF", "f": "eg", "F": "EG", "g": "fh", "G": "FH", "h": "gi", "H": "GI", "i": "hj", "I": "HJ", "j": "ik", "J": "IK", "r": "qs", "R": "QS", "s": "rt", "S": "RT", "t": "su", "T": "SU", "u": "tv", "U": "TV", "v": "uw", "V": "UW", "w": "vx", "W": "VX", "x": "wy", "X": "WY", "y": "xz", "Y": "XZ",  "k": "jl", "K": "JL", "l": "km", "L": "KM", "m": "ln", "M": "LN", "n": "mo", "N": "MO", "o": "np", "O": "NP", "p": "oq", "P": "OQ", "q": "pr", "Q": "PR", "z": "yA", "Z": "YA",
 }
-
 def encode_password_custom(password):
     result = ""
     for char in password:
         result += ENCODE_MAP.get(char, char)
     return result
-
 
 DECODE_MAP = {v: k for k, v in ENCODE_MAP.items()}
 
@@ -169,17 +162,13 @@ def decode_password_custom(encoded):
             i += 1
     return decoded
 
-
-
 def autosave_fs(interval=10):
     while True:
         time.sleep(interval)
         with open("data/filesystem.json", "w") as f:
             json.dump(fs, f, indent=4)
 
-
 threading.Thread(target=autosave_fs, daemon=True).start()
-
 
 def update_main_py_and_restart():
     main_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/main.py"
@@ -187,19 +176,13 @@ def update_main_py_and_restart():
     local_path = os.path.abspath(sys.argv[0])
     fs_path = os.path.join(os.path.dirname(local_path), "data", "filesystem.json")
 
-
     print("[ ✓ ] fetching update...")
-    time.sleep(random.randint(1, 3))  # Etwas kürzer, sonst nervt es beim Testen
+    time.sleep(random.randint(1, 3))
 
-
-    # main.py herunterladen und ersetzen
     urllib.request.urlretrieve(main_url, local_path)
     print("[ ✓ ] System was updated.")
 
-
-    # filesystem.json mit Erhalt von .userdata aktualisieren
     def merge_filesystem_userdata(fs_url, fs_path):
-        # Bestehende userdata laden
         if os.path.exists(fs_path):
             with open(fs_path, "r") as f:
                 local_fs = json.load(f)
@@ -207,73 +190,49 @@ def update_main_py_and_restart():
         else:
             local_userdata = {}
 
-
-        # Neue Datei von GitHub laden
         with urllib.request.urlopen(fs_url) as response:
             new_fs = json.load(response)
 
-
-        # userdata mergen
         if "/" in new_fs and ".etc" in new_fs["/"]:
             new_fs["/"][".etc"][".userdata"] = local_userdata
         else:
             print("[ ! ]: New filesystem.json is corrupted!")
 
-
-        # Neue Version speichern
         os.makedirs(os.path.dirname(fs_path), exist_ok=True)
         with open(fs_path, "w") as f:
             json.dump(new_fs, f, indent=4)
         print("[ ✓ ] filesystem.json was updated.")
 
-
     merge_filesystem_userdata(fs_url, fs_path)
-
 
     print("[ ✓ ] Update successful. Rebooting...")
     time.sleep(2)
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
-
-
-# Add these global variables at the top of the file
-# Initialize with only root user
-CURRENT_USER = None  # Will be set during first boot or login
+CURRENT_USER = None
 USERS = {
     "root": {"password": "root"}
 }
-
 
 # === Load virtual filesystem ===
 with open("data/filesystem.json", "r") as f:
     fs = json.load(f)
 
-
-cwd = ["/"]  # current working directory as list
+cwd = ["/"]
 USER = "user"
 LOGGED_IN = True
 CLIPBOARD = None
-
-
-# Add this after the other global variables (CURRENT_USER, USERS, etc.)
-# but before any function definitions
-
-
-# Initialize empty commands dictionary
 commands = {}
-
 
 # Security variables
 SUDO_ATTEMPT_COUNTER = 0
 SUDO_LOCKED_UNTIL = 0
-
 
 def get_dir(path_list):
     d = fs["/"]
     for p in path_list[1:]:
         d = d.get(p, {})
     return d
-
 
 def repair():
     global CURRENT_THEME_COLOR
@@ -283,7 +242,6 @@ def repair():
         print(CURRENT_SIDE_THEME)
         choice = input(CURRENT_INFO_THEME + "   Select option (1-2): ").strip()
 
-
         if choice == "1":
             update_main_py_and_restart()
         elif choice == "2":
@@ -291,64 +249,41 @@ def repair():
         else:
             print("Invalid option")
 
-
 def set_dir_value(path_list, value):
-    """Set a value in the virtual filesystem at the specified path."""
     d = fs["/"]
     for p in path_list[1:-1]:
         d = d.get(p, {})
     d[path_list[-1]] = value
 
-
 def has_permission(path_name):
-    """Check if user has permission to access a file/directory."""
     global CURRENT_USER
-    # Root can access everything
     if CURRENT_USER == "root" or is_sudo_active():
         return True
 
-
-    # Check for home directory access
     if path_name.startswith('.') and path_name != f".{CURRENT_USER}":
         return False
 
-
     return True
 
-
-# Update is_sudo_active function
 def is_sudo_active():
-    """Check if we
-    """
     global SUDO_MODE
     return SUDO_MODE
-
-
-SUDO_MODE = False  # Global variable to track sudo status
-
-
+SUDO_MODE = False
 def sudo(args):
-    """Execute command with root privileges."""
     if len(args) < 1:
         print("sudo: Missing command")
         return
 
-
-    # Check if sudo is temporarily locked
     global SUDO_ATTEMPT_COUNTER, SUDO_LOCKED_UNTIL
     current_time = time.time()
-
 
     if current_time < SUDO_LOCKED_UNTIL:
         remaining_time = int(SUDO_LOCKED_UNTIL - current_time)
         print(f"sudo: Authentication locked for {remaining_time} more seconds due to too many failed attempts")
         return
 
-
-    # Reset lock if it has expired
     if current_time > SUDO_LOCKED_UNTIL and SUDO_ATTEMPT_COUNTER >= 3:
         SUDO_ATTEMPT_COUNTER = 0
-
 
     try:
         stored_password = get_dir(["/", ".root"])[".sudopswd"]
@@ -364,7 +299,6 @@ def sudo(args):
 
 
         if SUDO_ATTEMPT_COUNTER >= 3:
-            # Lock sudo for 60 seconds after 3 failed attempts
             SUDO_LOCKED_UNTIL = current_time + 60
             print(f"sudo: Authentication failed - too many attempts. Locked for 60 seconds.")
         else:
@@ -372,18 +306,16 @@ def sudo(args):
         return
 
 
-    # Reset counter on successful authentication
     SUDO_ATTEMPT_COUNTER = 0
 
 
     global SUDO_MODE
-    SUDO_MODE = True  # Enable sudo mode
+    SUDO_MODE = True
 
 
     cmd = args[0]
 
 
-    # Special handling for 'su' command
     if cmd == "su":
         if len(args) < 2:
             print("sudo su: Missing username")
@@ -402,18 +334,16 @@ def sudo(args):
         try:
             commands[cmd](args[1:])
         finally:
-            SUDO_MODE = False  # Disable sudo mode after command execution
+            SUDO_MODE = False
     else:
-        SUDO_MODE = False  # Disable sudo mode if command not found
+        SUDO_MODE = False
         print(f"sudo: command '{cmd}' not found")
 
 
 def ls(args):
-    """List directory contents with optional flags."""
     d = get_dir(cwd)
     show_all = "-a" in args or is_sudo_active()
 
-    # Filter items based on permissions
     visible_items = {k: v for k, v in d.items()
                     if show_all or has_permission(k)}
 
@@ -422,7 +352,7 @@ def ls(args):
         return
 
 
-    if "-l" in args:  # detailed listing
+    if "-l" in args:
         for item in visible_items.keys():
             type_marker = "d" if isinstance(d[item], dict) else "f"
             size = len(str(d[item])) if isinstance(d[item], str) else 0
@@ -470,7 +400,7 @@ def cat(args):
 
 
     if name in d and isinstance(d[name], str):
-        if "-n" in args:  # show line numbers
+        if "-n" in args:
             for i, line in enumerate(d[name].split('\n'), 1):
                 print(f"{i:4d}  {line}")
         else:
@@ -480,7 +410,6 @@ def cat(args):
 
 
 def echo(args):
-    """Echo text and optionally write to file."""
     if len(args) < 1:
         return
 
@@ -506,35 +435,26 @@ def echo(args):
 
 
 def pwd(args):
-    """Print working directory."""
     path = "/" if len(cwd) == 1 else "/" + "/".join(cwd[1:])
     print(path)
 
 
 def date(args):
-    """Show current date and time."""
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-
-# Update get_current_username function
 def get_current_username():
-    """Get the current username"""
     global CURRENT_USER
     return CURRENT_USER
 
 
 def whoami(args):
-    """Show current user."""
     print(get_current_username())
 
 
 def clear(args):
-    """Clear screen."""
     print("\n" * 50)
 
 
 def cp(args):
-    """Copy file to another location."""
     if len(args) < 2:
         print("cp: Missing source or destination")
         return
@@ -554,14 +474,12 @@ def cp(args):
 
 
 def mv(args):
-    """Move/rename file."""
     if len(args) < 2:
         print("mv: Missing source or destination")
         return
 
 
 def grep(args):
-    """Search for pattern in file."""
     if len(args) < 2:
         print("grep: Missing pattern or file")
         return
@@ -579,7 +497,6 @@ def grep(args):
 
 
 def wc(args):
-    """Count lines, words, and characters in file."""
     if len(args) < 1:
         print("wc: Missing file")
         return
@@ -599,7 +516,6 @@ def wc(args):
 
 
 def df(args):
-    """Show filesystem usage."""
     total_size = 1000000  # simulate 1MB total size
     used = sum(len(str(v)) for v in get_dir(["/"]).values())
     free = total_size - used
@@ -610,7 +526,6 @@ def df(args):
 
 
 def tree(args, prefix=""):
-    """Show directory structure in tree format."""
     d = get_dir(cwd)
     items = list(d.items())
 
@@ -625,7 +540,6 @@ def tree(args, prefix=""):
 
 
 def find(args):
-    """Find files by name pattern."""
     if len(args) < 1:
         print("find: Missing pattern")
         return
@@ -695,34 +609,26 @@ def rm(args):
     del d[name]
 
 def own(args):
-    """Take ownership of a file/directory (remove dot prefix)."""
     if len(args) < 1:
         print("own: Missing file/directory name")
         return
-
     name = args[0]
     d = get_dir(cwd)
-
     if not name.startswith('.'):
         print(f"own: '{name}' is already owned by user")
         return
-
     if name not in d:
         print(f"own: Cannot find '{name}'")
         return
-
-    # Only normal users can own files (remove dot)
     if is_sudo_active():
         print("own: Root user cannot own files")
         return
-
-    new_name = name[1:]  # Remove the dot
+    new_name = name[1:]
     d[new_name] = d[name]
     del d[name]
     print(f"Successfully owned '{name}' as '{new_name}'")
 
 def disown(args):
-    """Remove ownership of a file/directory (add dot prefix)."""
     if len(args) < 1:
         print("disown: Missing file/directory name")
         return
@@ -737,8 +643,6 @@ def disown(args):
     if name not in d:
         print(f"disown: Cannot find '{name}'")
         return
-
-    # Only normal users can disown their files
     if is_sudo_active():
         print("disown: Root user cannot disown files")
         return
@@ -749,12 +653,10 @@ def disown(args):
     print(f"Successfully disowned '{name}' as '{new_name}'")
 
 def su(args):
-    """Switch user command - only accessible through sudo"""
     print("su: Permission denied (use 'sudo su username' instead)")
     return
 
 def adduser(args):
-    """Add a new user (requires sudo)"""
     if not is_sudo_active():
         print("adduser: Permission denied (requires sudo)")
         return
@@ -775,27 +677,17 @@ def adduser(args):
     if password != confirm:
         print("adduser: Passwords do not match")
         return
-
-    # Add user to USERS dictionary
     USERS[username] = {"password": encode_password_custom(password)}
-
-    # Create user directory structure in .etc/.userdata
     userdata_path = get_dir(["/", ".etc", ".userdata"])
     userdata_path[f".{username}"] = {
         ".username": username,
         ".password": encode_password_custom(password)
     }
-
-    # Handle home directory creation
     home_path = get_dir(["/", "home"])
-
-    # First time: rename default user directory to make it hidden
     if "user" in home_path:
         user_content = home_path["user"]
-        home_path[".User"] = user_content  # Changed to .User to match the default user name
+        home_path[".User"] = user_content
         del home_path["user"]
-
-    # Create new user's home directory (hidden)
     home_path[f".{username}"] = {
         "welcome.txt": f"Welcome {username} to PyShellOS!"
     }
@@ -891,8 +783,6 @@ def shell():
             print("\nUse 'exit' to shutdown system")
         except Exception as e:
             print(f"Error: {str(e)}")
-
-# Also update the settings function to reflect changes immediately
 def parse_path(path):
     """Convert a path string to a path list."""
     if path.startswith('/'):
@@ -902,7 +792,6 @@ def parse_path(path):
         return cwd + [p for p in path.split('/') if p]
 
 def nano(args):
-    """Simple text editor."""
     if len(args) < 1:
         print("nano: Missing filename")
         return
@@ -918,8 +807,6 @@ def nano(args):
 
     try:
         d = get_dir(directory)
-
-        # Check permissions
         if not has_permission(filename):
             print(f"nano: Permission denied: '{filename}'")
             return
@@ -927,11 +814,7 @@ def nano(args):
         if filename in d and not isinstance(d[filename], str):
             print(f"nano: '{filename}' is not a text file")
             return
-
-        # Show current content or empty string for new files
         content = d.get(filename, "")
-
-        # Show instructions
         print("┌Nano text Editor─┬────────┬─────────────┬─────────────────┬────────────┬───────────────────┐")
         print("│  Instructions:  │ Enter  │     :sv     │      :sn        │   :clear   │       :del        │")
         print("│                 │ Output │ save & exit │ exit w/o saving │ clear file │ del previous line │")
@@ -940,8 +823,6 @@ def nano(args):
 
         if content:
             print(content)
-
-        # Edit mode
         lines = []
         if content:
             lines = content.split('\n')
@@ -950,24 +831,20 @@ def nano(args):
             try:
                 line = input()
                 if line == ':sv':
-                    # Save and exit
                     new_content = '\n'.join(lines)
                     d[filename] = new_content
                     print(f"File '{filename}' saved")
                     break
                 elif line == ':sn':
-                    # Exit without saving
                     confirm = input("Exit without saving? (y/N): ")
                     if confirm.lower() == 'y':
                         break
                     continue
                 elif line == ':clear':
-                    # Clear all text
                     lines = []
                     print("All text cleared")
                     continue
                 elif line == ':del':
-                    # Delete last line
                     if lines:
                         removed = lines.pop()
                         print(f"Removed line: {removed}")
@@ -976,21 +853,17 @@ def nano(args):
                     continue
                 lines.append(line)
             except KeyboardInterrupt:
-                # Handle Ctrl+C
                 print("\nUse ':sn' to exit or ':sy' to save and exit")
                 continue
             except EOFError:
-                # Handle Ctrl+D
                 break
 
     except Exception as e:
         print(f"nano: Error accessing file: {str(e)}")
 
 def login():
-    """Handle user login process."""
     global CURRENT_USER, LOGGED_IN
 
-    # Initialize login attempt counters
     login_attempts = {}
     max_attempts = 3
     lockout_time = 60  # seconds
@@ -999,44 +872,35 @@ def login():
         print("\nWelcome to PyShellOS!")
         username = input("Username: ").strip()
 
-        # Check if username exists
         if username not in USERS:
             print("User not found!")
             continue
 
-        # Check if this user is locked out
         if username in login_attempts and 'locked_until' in login_attempts[username]:
             current_time = time.time()
             if current_time < login_attempts[username]['locked_until']:
                 remaining_time = int(login_attempts[username]['locked_until'] - current_time)
                 print(f"User locked. Try again in {remaining_time} seconds.")
-                time.sleep(1)  # Small delay to prevent rapid retries
                 continue
             else:
-                # Reset attempts if lockout period is over
                 if username in login_attempts:
                     login_attempts[username] = {'attempts': 0}
 
-
-        # Initialize attempt counter for this user if not already done
         if username not in login_attempts:
             login_attempts[username] = {'attempts': 0}
 
         password = input("Password: ").strip()
         if password != decode_password_custom(USERS[username]["password"]):
-            # Increment failed attempts
             login_attempts[username]['attempts'] += 1
             attempts_left = max_attempts - login_attempts[username]['attempts']
 
             if login_attempts[username]['attempts'] >= max_attempts:
-                # Lock the account
                 login_attempts[username]['locked_until'] = time.time() + lockout_time
                 print(f"Too many failed attempts. User locked for {lockout_time} seconds.")
             else:
                 print(f"Incorrect password! {attempts_left} attempt{'s' if attempts_left > 1 else ''} remaining.")
             continue
 
-        # Reset attempt counter on successful login
         if username in login_attempts:
             login_attempts[username] = {'attempts': 0}
 
@@ -1065,7 +929,6 @@ def reboot(args):
     print("System is rebooting...")
     time.sleep(1)
 
-    # Reset current session
     CURRENT_USER = None
     LOGGED_IN = False
     cwd = ["/"]
@@ -1073,7 +936,6 @@ def reboot(args):
     print("Booting PyShellOS...")
     time.sleep(1)
 
-    # Check if this is a post-reset boot
     is_first_boot = check_first_boot()
     if is_first_boot:
         print("\nDetected first boot!")
@@ -1085,11 +947,9 @@ def reboot(args):
     print(CURRENT_THEME_COLOR + "PyShellOS is ready!" + "\033[0m")
     print("Type 'help' for command list")
 
-# Update settings function to use reboot after reset
 def settings(args):
     global CURRENT_THEME_COLOR, THEME_SYMBOLS
     lang = get_current_language_from_virtual_fs()
-    """Terminal-based settings application."""
     if not is_sudo_active():
         print("Settings can only be accessed with sudo privileges")
         return
@@ -1247,7 +1107,6 @@ def system_info():
 def user_settings():
     lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
-    """Handle user-related settings."""
     while True:
         current_user = get_current_username()
         print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["user_settings"] + "\033[0m" + CURRENT_LINE_THEME * 34)
@@ -1324,13 +1183,13 @@ def update_settings():
     lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
-        print("│")
-        print("├    " + lang["current_version_info_table"] + "PyShellOS-01.02-Beta")
-        print("├   " + CURRENT_THEME_COLOR + "1. " + lang["update_version"] + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "2. " + lang["return_to_settings"] + "\033[0m")
-        print("│")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "    " + lang["current_version_info_table"] + "PyShellOS-01.02-Beta")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["update_version"] + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["return_to_settings"] + "\033[0m")
+        print(CURRENT_SIDE_THEME)
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
         choice = input(lang["option_2"]).strip()
@@ -1345,20 +1204,19 @@ def update_settings():
 
 
 def system_settings():
-    global CURRENT_THEME_COLOR,  CURRENT_APP_THEME
+    global CURRENT_THEME_COLOR
     lang = get_current_language_from_virtual_fs()
-    """Handle system-related settings."""
     while True:
-        print("┌" + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "1. " + lang["system_settings_reset_option"] + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "2. " + lang["system_settings_restart_option"] + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "3. " + lang["system_settings_bulk_remove_option"] + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "4. " + lang["system_settings_show_security_option"] + "\033[0m" + "\033[0m")
-        print("├   " + CURRENT_THEME_COLOR + "5. " + lang["system_settings_show_theme_option"] + "\033[0m" + "\033[0m")
-        print("│")
-        print("├   " + CURRENT_THEME_COLOR + "6. " + lang["return_to_settings"] + "\033[0m")
-        print("│")
+        print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_settings"] + "\033[0m" + "────────────────────────────────")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["system_settings_reset_option"] + "\033[0m" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["system_settings_restart_option"] + "\033[0m" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. " + lang["system_settings_bulk_remove_option"] + "\033[0m" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "4. " + lang["system_settings_show_security_option"] + "\033[0m" + "\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "5. " + lang["system_settings_show_theme_option"] + "\033[0m" + "\033[0m")
+        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "6. " + lang["return_to_settings"] + "\033[0m")
+        print(CURRENT_SIDE_THEME)
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
         choice = input("\nSelect option (1-5): ").strip()
@@ -1602,11 +1460,10 @@ def system_settings():
         ".e.txt": ""
     }
 }
-
                 USERS = {"root": {"password": "root"}}
                 print("OS reset complete!")
                 print("System will now reboot...")
-                reboot([])  # Reboot the system after reset
+                reboot([])
                 return
             else:
                 print("Reset cancelled")
@@ -1652,11 +1509,11 @@ def first_boot_setup():
     greetings = ["Hallo", "Hello", "bonjour", "привет", "こんにちは", "안녕하세요", "مرحبا", "Benvenuto"]
     for word in greetings:
         for i in range(1, len(word) + 1):
-            partical = word[:i]
+            animation = word[:i]
             clear_screen()
             print(CURRENT_TOP_THEME + CURRENT_LINE_THEME + CURRENT_THEME_COLOR + lang["first_boot_setup"] + "\033[0m" + CURRENT_LINE_THEME * 33)
             print(CURRENT_SIDE_THEME)
-            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + f"{partical}\033[0m")
+            print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + f"{animation}\033[0m")
             print(CURRENT_SIDE_THEME)
             print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + lang["continue"] + "\033[0m")
             print(CURRENT_SIDE_THEME)
@@ -1704,7 +1561,9 @@ def first_boot_setup_3():
         "3": "ru",
         "Русский": "ru",
         "4": "es",
-        "Español": "es"
+        "Español": "es",
+        "5": "fr",
+        "french": "fr"
     }
     if choice in lang_map:
         set_language_in_virtual_fs_setting(lang_map[choice])
@@ -1785,22 +1644,14 @@ def first_boot_setup_2():
                 continue
             break
 
-            # Add new user
-        # Encode password before storing
         encoded_pw = encode_password_custom(password)
-
-        # Add new user with encoded password
         USERS[username] = {"password": encoded_pw}
-
-        # Update .etc structure
         fs["/"][".etc"][".userdata"] = {
             f".{username}": {
                 ".username": username,
                 ".password": encoded_pw
             }
         }
-
-        # Create home directory structure
         fs["/"]["home"] = {
             username: {
                 "Documents": {},
@@ -1814,11 +1665,9 @@ def first_boot_setup_2():
         print(CURRENT_INFO_THEME + lang["username_word"] +  f" {username}")
         print(CURRENT_SIDE_THEME)
 
-        # Set current user
         global CURRENT_USER
         CURRENT_USER = username
 
-        # Persist to disk
         with open("data/filesystem.json", "w") as f:
             json.dump(fs, f, indent=4)
 
@@ -1830,20 +1679,15 @@ def first_boot_setup_2():
         print(CURRENT_SIDE_THEME + lang["temp_tip_1"])
         print(CURRENT_SIDE_THEME + lang["temp_tip_2"])
 
-
 def check_first_boot():
-    """Check if this is the first time the system is running."""
     try:
-        # Check if any non-root users exist in .userdata
         userdata = fs["/"][".etc"][".userdata"]
         user_count = len([k for k in userdata.keys() if k != ".root"])
         return user_count == 0
     except:
         return True
 
-# Load these AFTER the first boot check
 def load_users():
-    """Load users from filesystem."""
     try:
         userdata = get_dir(["/", ".etc", ".userdata"])
         for user_entry in userdata:
@@ -1855,9 +1699,7 @@ def load_users():
     except:
         pass
 
-# more infos
 def users(args):
-    """Show all users on the system."""
     if not is_sudo_active():
         print("users: Permission denied (requires sudo)")
         return
@@ -1866,24 +1708,16 @@ def users(args):
     print("-" * 30)
     print(f"{'Username':<20} {'Type'}")
     print("-" * 30)
-    
-    # First show root user
+
     print(f"{'root':<20} {'system'}")
 
-
-    # Then show other users
     for username in USERS:
         if username != "root":
             print(f"{username:<20} {'user'}")
 
-
 def neofetch(args=None):
     now = datetime.now()
-
     total, used, free = shutil.disk_usage("/")
-
-
-    """Show system information."""
     print("\n=== PyShellOS System Information ===")
     print("\nSystem Information:")
     print(fr" /$$$$$$$              - OS: PyShellOS-01-01-Beta")
@@ -1897,7 +1731,6 @@ def neofetch(args=None):
     print(fr"             /$$  | $$")
     print(fr"            |  $$$$$$/")
     print(fr"             \______/")
-
 
 def info(args):
     if args is None:
@@ -1984,7 +1817,6 @@ def info(args):
     else:
         print("info: Invalid option")
     return
-# Then at the bottom of the file, after all function definitions but before shell()
 def init_commands():
     global commands
     commands.update({
@@ -2021,10 +1853,6 @@ def init_commands():
         "info": info
     })
 
-
-
-
-# Update the main block to use login()
 if __name__ == "__main__":
     print("Booting PyShellOS...")
     time.sleep(1)
@@ -2080,7 +1908,6 @@ if __name__ == "__main__":
     time.sleep(random.randint(1, 3))
     print("\n" * 50)
 
-
     is_first_boot = check_first_boot()
     if is_first_boot:
         print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Detected first boot... This could take a moment...")
@@ -2092,7 +1919,6 @@ if __name__ == "__main__":
     else:
         load_users()
         login()
-
 
     init_commands()
     print(CURRENT_SIDE_THEME + "\033[1;32m" + r" /$$$$$$$             /$$$$$$  /$$                 /$$ /$$  /$$$$$$   /$$$$$$" + "\033[0m")
