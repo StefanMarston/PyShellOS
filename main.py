@@ -1525,7 +1525,7 @@ def clear_screen():
 def first_boot_setup():
     lang = get_current_language_from_virtual_fs()
     global CURRENT_THEME_COLOR
-    greetings = ["Hallo", "Hello", "bonjour", "привет", "こんにちは", "안녕하세요", "مرحبا", "Benvenuto"]
+    greetings = ["Hello", "Hallo", "привет", "Hola", "bonjour", "こんにちは", "Benvenuto"]
     for word in greetings:
         for i in range(1, len(word) + 1):
             animation = word[:i]
@@ -1569,20 +1569,34 @@ def first_boot_setup_3():
     print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "2. Deutsch" + "\033[0m")
     print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "3. Русский" + "\033[0m")
     print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "4. Español" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "5. Français" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "6. 日本語" + "\033[0m")
+    print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "7. Italiano" + "\033[0m")
     print(CURRENT_SIDE_THEME)
     print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
-    choice = input("\nSelect option (1-4): ").strip()
+    choice = input("\nSelect option (1-7): ").strip()
     lang_map = {
         "1": "en",
+        "en": "en",
         "english": "en",
         "2": "de",
+        "de": "de",
         "deutsch": "de",
         "3": "ru",
+        "ру": "ru",
         "Русский": "ru",
         "4": "es",
+        "es": "es",
         "Español": "es",
         "5": "fr",
-        "french": "fr"
+        "fr": "fr",
+        "Français": "fr",
+        "6": "ja",
+        "日": "ja",
+        "日本語": "ja",
+        "7": "it",
+        "it": "it",
+        "Italiano": "it"
     }
     if choice in lang_map:
         set_language_in_virtual_fs_setting(lang_map[choice])
