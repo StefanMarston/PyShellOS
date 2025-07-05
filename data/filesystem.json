@@ -67,7 +67,7 @@
         },
         "lib-usr": {
             "current_language": "en",
-            "current_theme": "\u001b[1;91m",
+            "current_theme": "\u001b[1;32m",
             "current_theme_id": "1",
             "themes": {
                 "1": {

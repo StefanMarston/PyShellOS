@@ -173,15 +173,21 @@ threading.Thread(target=autosave_fs, daemon=True).start()
 def update_main_py_and_restart():
     main_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/main.py"
     fs_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/data/filesystem.json"
+    lang_url = "https://raw.githubusercontent.com/StefanMarston/PyShellOS/main/data/languages.json"
+
     local_path = os.path.abspath(sys.argv[0])
-    fs_path = os.path.join(os.path.dirname(local_path), "data", "filesystem.json")
+    base_dir = os.path.dirname(local_path)
+    fs_path = os.path.join(base_dir, "data", "filesystem.json")
+    lang_path = os.path.join(base_dir, "data", "languages.json")
 
     print("[ ✓ ] fetching update...")
     time.sleep(random.randint(1, 3))
 
+    # Update main.py
     urllib.request.urlretrieve(main_url, local_path)
     print("[ ✓ ] System was updated.")
 
+    # Merge and update filesystem.json
     def merge_filesystem_userdata(fs_url, fs_path):
         if os.path.exists(fs_path):
             with open(fs_path, "r") as f:
@@ -204,6 +210,19 @@ def update_main_py_and_restart():
         print("[ ✓ ] filesystem.json was updated.")
 
     merge_filesystem_userdata(fs_url, fs_path)
+
+    def update_languages(lang_url, lang_path):
+        try:
+            with urllib.request.urlopen(lang_url) as response:
+                lang_data = response.read()
+            os.makedirs(os.path.dirname(lang_path), exist_ok=True)
+            with open(lang_path, "wb") as f:
+                f.write(lang_data)
+            print("[ ✓ ] languages.json was updated.")
+        except Exception as e:
+            print(f"[ ! ] Failed to update languages.json: {e}")
+
+    update_languages(lang_url, lang_path)
 
     print("[ ✓ ] Update successful. Rebooting...")
     time.sleep(2)
