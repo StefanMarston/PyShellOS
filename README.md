@@ -32,6 +32,14 @@ choose option 1
 and wait
 ```
 
+New to 1.3.1-Alpha
+
+The setup has been changed. to apply for alpha please go to settings -> update -> beta features and activate it!
+Inside the new setup I have added: 
+- Color shenes. Your text will be now changed based on yojr preferences.
+- Different application boreders. There's now basic, double, pointed.
+- Different Langiages: French, German, Russian, English, Spanish.
+
 Basic command usage:
 
 # Filesystem #
