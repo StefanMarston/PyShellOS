@@ -880,6 +880,97 @@ def nano(args):
     except Exception as e:
         print(f"nano: Error accessing file: {str(e)}")
 
+
+#only required here!
+import string
+
+def StressTest(*args):
+    def clear():
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    def print_menu(rerun=False):
+        clear()
+        print("┌" + CURRENT_THEME_COLOR +  "StressTest" + "\033[0m" + "───────┬────────┬─────────────┬─────────────────┬────────────┐")
+        print("│  Instructions:  │ Enter  │     :st     │      :ex        │     :re    │")
+        print("│                 │ Output │    start    │      exit       │    rerun   │")
+        print("│                 └────────┴─────────────┴─────────────────┴────────────┘")
+        if rerun:
+            print("\n[MODE] Rerun enabled — use ':re' to repeat the test.\n")
+        else:
+            print("\n[MODE] Normal — use ':st' to start the test.\n")
+
+    def random_code(length=4):
+        """Generate random 4-character alphanumeric string."""
+        chars = string.ascii_uppercase + string.digits
+        return ''.join(random.choices(chars, k=length))
+
+    def run_test(duration=60, prints_per_sec=5):
+        points = 0
+        total_expected_points = duration * prints_per_sec
+
+        clear()
+        print(f"Starting StressTest... ({duration}s, {prints_per_sec} prints/sec)\n")
+
+        start_time = time.time()
+        for second in range(duration):
+            sec_start = time.time()
+            for _ in range(prints_per_sec):
+                print(f"CPU_TEST_RUN_DIGIT::{random_code()}")
+                points += 1
+                time.sleep(1 / prints_per_sec)
+            drift = time.time() - sec_start
+            if drift < 1.0:
+                time.sleep(1.0 - drift)
+
+        total_time = time.time() - start_time
+        percent_score = (points / total_expected_points) * 100
+
+        print("\n────────────────────────────────────────────────────────────")
+        print("StressTest completed successfully!")
+        print(f"Total Time: {total_time:.2f} seconds")
+        print(f"Total Points Earned: {points} / {total_expected_points}")
+        print(f"Average Prints per Second: {points / total_time:.2f}")
+        print(f"Performance Score: {percent_score:.2f}%")
+        print("────────────────────────────────────────────────────────────\n")
+
+        input("Press [Enter] to continue...")
+        return points
+
+    rerun_mode = False
+    last_config = (60, 5)
+
+    while True:
+        print_menu(rerun_mode)
+        cmd = input(">>> ").strip().lower()
+
+        if cmd.startswith(":ex"):
+            print("Exiting StressTest...")
+            time.sleep(1)
+            break
+
+        elif cmd.startswith(":re") and rerun_mode:
+            run_test(*last_config)
+
+        elif cmd.startswith(":st"):
+            parts = cmd.split()
+            if len(parts) == 1:
+                duration, pps = 60, 5
+            elif len(parts) == 3 and parts[1].isdigit() and parts[2].isdigit():
+                duration, pps = int(parts[1]), int(parts[2])
+            else:
+                print("Usage: :st [seconds] [prints_per_second]")
+                time.sleep(1)
+                continue
+
+            last_config = (duration, pps)
+            run_test(duration, pps)
+            rerun_mode = True
+
+        else:
+            print("Invalid command. Use :st, :st <sec> <pps>, :re or :ex.")
+            time.sleep(1)
+
+
 def login():
     global CURRENT_USER, LOGGED_IN
 
@@ -977,7 +1068,7 @@ def settings(args):
         current_user = get_current_username()
         print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["settings"] + "\033[0m" + CURRENT_LINE_THEME * 21)
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_SIDE_THEME + lang["current_user_wording"] + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + lang["with_permission_wording"] + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == "None" else 'user'}" + "\033[0m")
+        print(CURRENT_SIDE_THEME + lang["current_user_wording"] + CURRENT_THEME_COLOR + f"{current_user} " + "\033[0m" + lang["with_permission_wording"] + CURRENT_THEME_COLOR + f"{'system' if current_user == 'root' or 'none' == current_user == 'None' else 'user'}" + "\033[0m")
         print(CURRENT_SIDE_THEME)
         print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["user_settings_option"] + "\033[0m")
         print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["general_settings_option"] + "\033[0m")
@@ -1097,20 +1188,22 @@ def system_info():
     global CURRENT_THEME_COLOR
     while True:
         print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_info"] + "\033[0m" + CURRENT_LINE_THEME * 37)
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "             OS: PyShellOS-01.02-Beta"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"  Architecture: {platform.machine()}"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "          Shell: PyshellOS-Terminal"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "        Version: PyShellOS-3.1.Beta - The Customization Update"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "         Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "      Publisher: Stefan Kilber"+"\033[0m")
-        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + "           Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"                                  OS: PyShellOS-3.2-Beta"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  /$$$$$$$                    MainOS: {platform.system()}-{platform.release()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$__  $$            Architecture: {platform.machine()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$  \ $$ /$$   /$$        Python: {platform.python_version()}"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$$$$$$/| $$  | $$         Shell: PyshellOS-Terminal"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$____/ | $$  | $$       Version: PyShellOS-3.2.Beta - The Stress Update"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      | $$  | $$        Python: Py3 - Python3 - Py3.1Rls"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      |  $$$$$$$     Publisher: Stefan Kilber"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  |__/       \____  $$          Help: https://github.com/StefanMarston/PyShellOS"+"\033[0m")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              /$$  | $$")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"             |  $$$$$$/")
+        print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              \______/")
         print(CURRENT_SIDE_THEME)
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["user_settings"] + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang["general_settings_option"] + "\033[0m")
-        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + lang["return_to_settings"] + "\033[0m")
-        print(CURRENT_SIDE_THEME)
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "1. " + lang["user_settings"] + "\033[0m"+"\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "2. " + lang["general_settings_option"] + "\033[0m"+"\033[0m")
+        print(CURRENT_INFO_THEME + "   " + CURRENT_THEME_COLOR + "3. " + lang["return_to_settings"] + "\033[0m"+"\033[0m")
         print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
         choice = input(lang["option_3"]).strip()
 
@@ -1243,6 +1336,7 @@ def system_settings():
         if choice == "1":
             confirm = input("Are you sure you want to reset PyShellOS? This will erase all data! (type 'RESET' to confirm): ")
             if confirm == "RESET":
+                OK = print("[ " + f"\033[1;32m" + "OK " + "\033[0m" + "]")
                 print("\n[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Initializing system...")
                 time.sleep(random.randint(1, 2))
                 print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Mounting /Kernel")
@@ -1290,7 +1384,8 @@ def system_settings():
                 print("[ " + f"\033[1;32m" + "✓ " + "\033[0m" + "] Validating kernel Signature")
                 time.sleep(random.randint(1, 3))
                 global fs, USERS
-                fs = {"/": {
+                fs = {
+    "/": {
         "trash": {},
         "bin": {
             "x11": {},
@@ -1350,13 +1445,47 @@ def system_settings():
             ".hpet,txt": {}
         },
         ".etc": {
-            ".userdata": {
-            }
+            ".userdata": {}
         },
         "lib": {},
         "home": {
+            "new.txt": "stack begin:\n  start firstL: codeIN.txt\n    codeIn.txt = Hello World\n    code.In.txt == executable\n  end firstL;\n  start SecL: codeIn::2\n    codeIn.txt mov : Echo\n    echo codeIn.firstL\n  end SecL;\nstack end;\nstack approve;\nstack run;"
         },
-        "lib-usr": {},
+        "lib-usr": {
+            "current_language": "en",
+            "current_theme": "\u001b[1;94m",
+            "current_theme_id": "1",
+            "themes": {
+                "1": {
+                    "INFO": "ROUNDED_INFO",
+                    "LINE": "ROUNDED_LINE",
+                    "TOP": "ROUNDED_TOP",
+                    "SIDE": "ROUNDED_SIDE",
+                    "BOTTOM": "ROUNDED_BOTTOM"
+                },
+                "2": {
+                    "INFO": "THIN_INFO",
+                    "LINE": "THIN_LINE",
+                    "TOP": "THIN_TOP",
+                    "SIDE": "THIN_SIDE",
+                    "BOTTOM": "THIN_BOTTOM"
+                },
+                "3": {
+                    "INFO": "THICK_INFO",
+                    "LINE": "THICK_LINE",
+                    "TOP": "THICK_TOP",
+                    "SIDE": "THICK_SIDE",
+                    "BOTTOM": "THICK_BOTTOM"
+                },
+                "4": {
+                    "INFO": "DOUBLE_INFO",
+                    "LINE": "DOUBLE_LINE",
+                    "TOP": "DOUBLE_TOP",
+                    "SIDE": "DOUBLE_SIDE",
+                    "BOTTOM": "DOUBLE_BOTTOM"
+                }
+            }
+        },
         "lib64": {},
         "media": {},
         "mnt": {},
@@ -1449,7 +1578,16 @@ def system_settings():
             "86": {}
         },
         ".root": {
-            ".critical": "0x0000000102612000 1024",
+            ".critical": {
+                ".x86-64-boot": {},
+                ".x86": {
+                    ".boot": {
+                        "mountable.sh": "0x0000000102612000 1024",
+                        "bootable.sh": "0x0000000102612000 1024"
+                    }
+                },
+                ".x86-64": {}
+            },
             ".sudopswd": "root"
         },
         "run": {},
@@ -1478,7 +1616,7 @@ def system_settings():
         "q.txt": "e",
         ".e.txt": ""
     }
-}
+                }
                 USERS = {"root": {"password": "root"}}
                 print("OS reset complete!")
                 print("System will now reboot...")
@@ -1750,20 +1888,123 @@ def users(args):
 
 def neofetch(args=None):
     now = datetime.now()
+    lang = get_current_language_from_virtual_fs()
     total, used, free = shutil.disk_usage("/")
-    print("\n=== PyShellOS System Information ===")
-    print("\nSystem Information:")
-    print(fr" /$$$$$$$              - OS: PyShellOS-01-01-Beta")
-    print(fr" | $$__  $$            - OS: {platform.system()} {platform.release()}")
-    print(fr" | $$  \ $$ /$$   /$$  - Architecture: {platform.machine()}")
-    print(fr" | $$$$$$$/| $$  | $$  - Python: {platform.python_version()}")
-    print(fr" | $$____/ | $$  | $$  - Shell: PyShellOS-Terminal")
-    print(fr" | $$      | $$  | $$  - Disk: {round(used / (1024 ** 3), 2)} GB used / {round(total / (1024 ** 3), 2)} GB total")
-    print(fr" | $$      |  $$$$$$$  - Python: Py3")
-    print(fr" |__/       \____  $$  - Shell: PyShellOS-Terminal")
-    print(fr"             /$$  | $$")
-    print(fr"            |  $$$$$$/")
-    print(fr"             \______/")
+    global CURRENT_THEME_COLOR
+    print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_info"] + "\033[0m" + CURRENT_LINE_THEME * 37)
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"                                  OS: PyShellOS-3.2-Beta" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  /$$$$$$$                    MainOS: {platform.system()}-{platform.release()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$__  $$            Architecture: {platform.machine()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$  \ $$ /$$   /$$        Python: {platform.python_version()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$$$$$$/| $$  | $$         Shell: PyshellOS-Terminal" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$____/ | $$  | $$       Version: PyShellOS-3.2.Beta - The Stress Update" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      | $$  | $$        Python: Py3 - Python3 - Py3.1Rls" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      |  $$$$$$$     Publisher: Stefan Kilber" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  |__/       \____  $$          Help: https://github.com/StefanMarston/PyShellOS" + "\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              /$$  | $$"+"\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"             |  $$$$$$/"+"\033[0m")
+    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              \______/"+"\033[0m")
+    print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
+
+import curses
+import math
+import re
+
+SHORTCUTS = {
+    't': '^',  # Power
+    'z': '*',  # Multiply
+    'u': '-',  # Minus
+    'g': '!',  # Factorial
+    'h': '+',  # Plus
+    'j': '/',  # Divide
+    'b': 'x',  # Alternative for *
+    '%': '%',  # Percent
+    '~': '~',  # Round
+}
+
+def transform_expr(expr):
+    """Convert user input into a Python-evaluable expression."""
+    py_expr = expr.replace('x', '*').replace('^', '**')
+
+    # Factorial (!)
+    while '!' in py_expr:
+        match = re.search(r'(\d+)!', py_expr)
+        if not match:
+            break
+        num = match.group(1)
+        py_expr = py_expr.replace(f"{num}!", f"math.factorial({num})", 1)
+
+    # Round (~)
+    while '~' in py_expr:
+        match = re.search(r'(\d+(?:\.\d+)?)~', py_expr)
+        if not match:
+            break
+        num = match.group(1)
+        py_expr = py_expr.replace(f"{num}~", f"round({num})", 1)
+
+    # Percent (%)
+    while '%' in py_expr:
+        match = re.search(r'(\d+(?:\.\d+)?)%', py_expr)
+        if not match:
+            break
+        num = match.group(1)
+        py_expr = py_expr.replace(f"{num}%", f"({num}/100)", 1)
+
+    # Remove trailing operators
+    py_expr = re.sub(r'[\+\-\*/\^]$', '', py_expr)
+    return py_expr
+
+def eval_expr(expr):
+    if not expr.strip():
+        return ""
+    py_expr = transform_expr(expr)
+    try:
+        return eval(py_expr, {"__builtins__": None, "math": math, "round": round})
+    except:
+        return "…"
+
+def calculator(args=None):
+    def run_calc(stdscr):
+        curses.curs_set(1)
+        expr = ""
+
+        while True:
+            stdscr.clear()
+            # Top border
+            stdscr.addstr(0, 0, CURRENT_TOP_THEME + CURRENT_LINE_THEME * 28)
+            # Expression input
+            stdscr.addstr(1, 0, CURRENT_SIDE_THEME + f"  {expr}")
+            # Evaluation result
+            result = eval_expr(expr)
+            stdscr.addstr(2, 0, CURRENT_SIDE_THEME + (f"      = {result}" if result != "" else "  Type expression..."))
+            # Bottom border
+            stdscr.addstr(3, 0, CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 28)
+
+            # Shortcut table
+            stdscr.addstr(5, 0, CURRENT_SIDE_THEME + "Shortcuts:")
+            stdscr.addstr(6, 0, CURRENT_SIDE_THEME + "  t=^   z=*   g=! ")
+            stdscr.addstr(7, 0, CURRENT_SIDE_THEME + "  u=-   h=+   j=/ ")
+            stdscr.addstr(8, 0, CURRENT_SIDE_THEME + "  %=percent  b=x   ~=round ")
+
+            stdscr.refresh()
+
+            key = stdscr.get_wch()
+
+            if key in ('\x1b', 'q'):
+                break
+            elif key in ('\n', '\r'):
+                expr = ""
+            elif key in ('\x7f', '\b', curses.KEY_BACKSPACE, 263):
+                expr = expr[:-1]
+            elif isinstance(key, str):
+                if key in SHORTCUTS:
+                    expr += SHORTCUTS[key]
+                else:
+                    expr += key
+
+    curses.wrapper(run_calc)
+
+
 
 def info(args):
     if args is None:
@@ -1883,7 +2124,9 @@ def init_commands():
         "reboot": reboot,
         "users": users,
         "neofetch": neofetch,
-        "info": info
+        "info": info,
+        "stresstest": StressTest,
+        "calculator": calculator
     })
 
 if __name__ == "__main__":
