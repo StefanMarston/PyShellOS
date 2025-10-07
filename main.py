@@ -47,7 +47,7 @@ def get_current_language_from_virtual_fs():
 
     return all_languages[lang_code]
 
-CURRENT_THEME_COLOR = "\033[1;32m"
+CURRENT_THEME_COLOR = "\033[1;94m"
 THEMES = {
     "green": "\033[1;32m",
     "yellow": "\033[1;93m",
@@ -1887,23 +1887,29 @@ def users(args):
             print(f"{username:<20} {'user'}")
 
 def neofetch(args=None):
+    def get_current_theme_name():
+        for name, code in THEMES.items():
+            if code == CURRENT_THEME_COLOR:
+                return name
+        return "unknown"
+
     now = datetime.now()
     lang = get_current_language_from_virtual_fs()
     total, used, free = shutil.disk_usage("/")
     global CURRENT_THEME_COLOR
     print(CURRENT_TOP_THEME + CURRENT_THEME_COLOR + "\033[1m" + lang["system_info"] + "\033[0m" + CURRENT_LINE_THEME * 37)
     print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"                                  OS: PyShellOS-3.2-Beta" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  /$$$$$$$                    MainOS: {platform.system()}-{platform.release()}" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$__  $$            Architecture: {platform.machine()}" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$  \ $$ /$$   /$$        Python: {platform.python_version()}" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$$$$$$/| $$  | $$         Shell: PyshellOS-Terminal" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$____/ | $$  | $$       Version: PyShellOS-3.2.Beta - The Stress Update" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      | $$  | $$        Python: Py3 - Python3 - Py3.1Rls" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  | $$      |  $$$$$$$     Publisher: Stefan Kilber" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"  |__/       \____  $$          Help: https://github.com/StefanMarston/PyShellOS" + "\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              /$$  | $$"+"\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"             |  $$$$$$/"+"\033[0m")
-    print(CURRENT_SIDE_THEME + CURRENT_THEME_COLOR + rf"              \______/"+"\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"/$$$$$$$" + CURRENT_THEME_COLOR + f"                    MainOS: {platform.system()}-{platform.release()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$__  $$" + CURRENT_THEME_COLOR + f"            Architecture: {platform.machine()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$  \ $$ /$$   /$$" + CURRENT_THEME_COLOR + f"        Python: {platform.python_version()}" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$$$$$$/| $$  | $$" + CURRENT_THEME_COLOR + "         Shell: PyshellOS-Terminal" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$____/ | $$  | $$" + CURRENT_THEME_COLOR + "       Version: PyShellOS-3.2.Beta - The Stress Update" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$      | $$  | $$" + CURRENT_THEME_COLOR + "        Python: Py3 - Python3 - Py3.1Rls" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$      |  $$$$$$$" + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"|__/       \____  $$" + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS" + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"              " + "\033[0;32m" + rf"/$$  | $$" + CURRENT_THEME_COLOR + "  Shell-Color: " + get_current_theme_name() + "\033[0m")
+    print(CURRENT_SIDE_THEME + rf"             " + "\033[0;32m" + rf"|  $$$$$$/"+"\033[0m")
+    print(CURRENT_SIDE_THEME + rf"              " + "\033[0;32m" + rf"\______/"+"\033[0m")
     print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
 import curses
