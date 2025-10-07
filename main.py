@@ -1712,7 +1712,13 @@ def first_boot_setup_3():
     print(CURRENT_INFO_THEME + CURRENT_THEME_COLOR + "7. Italiano" + "\033[0m")
     print(CURRENT_SIDE_THEME)
     print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
-    choice = input("\nSelect option (1-7): ").strip()
+    choice = input("\nSelect option (1-7) or 's' + Enter to skip: ").strip().lower()
+
+    if choice == "s":
+        print("Developer shortcut executed! if this was a mistake please refer to https://github.com/StefanMarston/PyShellOS/blob/main/README.md")
+        shell()
+        return
+
     lang_map = {
         "1": "en",
         "en": "en",
