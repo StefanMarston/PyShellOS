@@ -233,7 +233,6 @@ USERS = {
     "root": {"password": "root"}
 }
 
-# === Load virtual filesystem ===
 with open("data/filesystem.json", "r") as f:
     fs = json.load(f)
 
@@ -1717,6 +1716,8 @@ def first_boot_setup_3():
     if choice == "s":
         print("Developer shortcut executed! if this was a mistake please refer to https://github.com/StefanMarston/PyShellOS/blob/main/README.md")
         shell()
+        init_commands()
+        load_users()
         return
 
     lang_map = {
@@ -1914,7 +1915,7 @@ def neofetch(args=None):
     print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"| $$      |  $$$$$$$" + CURRENT_THEME_COLOR + "     Publisher: Stefan Kilber" + "\033[0m")
     print(CURRENT_SIDE_THEME + rf"  " + "\033[0;32m" + rf"|__/       \____  $$" + CURRENT_THEME_COLOR + "          Help: https://github.com/StefanMarston/PyShellOS" + "\033[0m")
     print(CURRENT_SIDE_THEME + rf"              " + "\033[0;32m" + rf"/$$  | $$" + CURRENT_THEME_COLOR + "  Shell-Color: " + get_current_theme_name() + "\033[0m")
-    print(CURRENT_SIDE_THEME + rf"             " + "\033[0;32m" + rf"|  $$$$$$/"+"\033[0m")
+    print(CURRENT_SIDE_THEME + rf"             " + "\033[0;32m" + rf"|  $$$$$$/" + CURRENT_THEME_COLOR + f"         User: {get_current_username()}" + "\033[0m")
     print(CURRENT_SIDE_THEME + rf"              " + "\033[0;32m" + rf"\______/"+"\033[0m")
     print(CURRENT_BOTTOM_THEME + CURRENT_LINE_THEME * 49)
 
