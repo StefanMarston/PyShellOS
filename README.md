@@ -186,3 +186,24 @@ UPDATE SETTINGS
 └───────────────────────────────────────────────
 
 ```
+
+
+# Common mistakes
+
+Pressing 's' while PyShellOS Setup:
+
+```shell
+sudo settings
+[enter] -> root
+[enter] -> 2
+[enter] -> 1
+[enter] RESET
+```
+This will reset the virtual system so you cna set it up as intended.
+
+Otherwise you can do
+
+```shell
+sudo adduser <user>
+[enter] -> <password for user>
+```
