@@ -193,6 +193,7 @@ UPDATE SETTINGS
 Pressing 's' while PyShellOS Setup:
 
 ```shell
+exit
 sudo settings
 [enter] -> root
 [enter] -> 2
